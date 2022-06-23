@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="100%" width="100%" viewBox="0 0 1024 629" version="1.1" xmlns:xlink= "http://www.w3.org/1999/xlink"><image width="1024" height="629" xlink:href="https://www.munichclimbs.de/images/topos/PrunnerWandForSvg.jpg" x="0" y="0"/>
+
+<defs>
+	<marker id="dot" viewBox="0 0 20 20" refX="8" refY="8" markerWidth="8" markerHeight="8">
+      <circle cx="8" cy="8" r="7" fill="#fff" stroke="#000" stroke-width="2"/>
+    </marker>
+    <!--<marker id="start" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">
+      <rect width="20" height="20" fill="#000"></rect>
+      <text x="10" y="10" font-family="Verdana" font-size="10" fill="#fff" text-anchor="middle" alignment-baseline="central" class="number"></text>
+    </marker>-->
+
+    <marker id="start" viewBox="0 0 42 42" refX="10" refY="10" markerWidth="20" markerHeight="20">
+      <rect width="20" height="20"></rect>
+    </marker>
+</defs>
+
+<path d="M110 543 L98 366" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)" />
+<text class="number" x="110" y="543" ></text>
+<path d="M172 544 L139 454 L140 420 L144 357 L146 283" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/>
+<text class="number" x="172" y="544" ></text>
+<path d="M151 447 L171 403 L174 326 L164 284 L158 279" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/>
+<text class="number" x="151" y="447" ></text>
+<path d="M234 571 L224 520 L244 465 L256 404 L248 361 L234 307 L236 256" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/>
+<text class="number" x="234" y="571" ></text>
+<path d="M383 578 L376 465 L361 430 L325 378 L325 311 L348 234" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/>
+<text class="number" x="110" y="543" ></text>
+<path d="M376 435 L380 356 L365 331 L358 284 L354 240" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-start="url(#start)"/>
+<text class="number" x="110" y="543" ></text>
+<path d="M381 333 L388 272 L389 140" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/>
+<text class="number" x="110" y="543" ></text>
+<path d="M380 496 L399 454 L410 411 L411 358 L408 310 L404 259 L403 198 L399 145" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-start="url(#start)"/>
+<text class="number" x="110" y="543" ></text>
+<path d="M435 563 L422 471 L422 424 L416 391" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-start="url(#start)"/>
+<text class="number" x="110" y="543" ></text>
+<path d="M427 409 L426 330 L418 252 L416 197" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/>
+<text class="number" x="110" y="543" ></text>
+<path d="M538 599 L544 513 L543 469 L528 415 L517 385 L524 330 L524 261 L523 203 L525 166" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/>
+<text class="number" x="110" y="543" ></text>
+<path d="M547 454 L561 337 L561 265 L563 167 L571 104" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/>
+<text class="number" x="110" y="543" ></text>
+<path d="M583 606 L587 523 L586 432 L583 374 L589 327 L594 300 L604 244 L605 185 L612 92" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/>
+<text class="number" x="110" y="543" ></text>
+<path d="M608 536 L617 488 L625 428 L625 381 L628 339 L628 291" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/>
+<text class="number" x="110" y="543" ></text>
+<path d="M629 275 L628 220 L632 170 L639 129 L648 77 L648 54" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/><text class="number" x="110" y="543" ></text>
+<path d="M655 613 L656 575 L655 541 L649 516 L640 485 L628 454" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-start="url(#start)"/><text class="number" x="110" y="543" ></text>
+<path d="M680 618 L680 552 L674 502 L658 470 L649 443 L649 401 L652 338 L644 321 L649 286 L653 267 L660 237 L656 190 L655 158 L660 131 L679 73" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/><text class="number" x="110" y="543" ></text>
+<path d="M676 478 L670 419 L670 350 L672 318 L678 295 L675 267 L675 226" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/><text class="number" x="110" y="543" ></text>
+<path d="M714 595 L714 559 L714 501 L698 432 L697 387 L698 330 L699 263 L694 221" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/><text class="number" x="110" y="543" ></text>
+<path d="M725 508 L728 447 L728 380 L729 318 L728 276" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/><text class="number" x="110" y="543" ></text>
+<path d="M769 595 L768 535 L761 474 L761 423 L761 377 L759 303 L752 238" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/><text class="number" x="110" y="543" ></text>
+<path d="M810 609 L810 558 L804 488 L800 415 L796 364 L794 299 L796 279 L802 245 L802 216 L800 174 L800 132 L799 96" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/><text class="number" x="110" y="543" ></text>
+<path d="M810 388 L818 365 L826 322 L823 279 L811 218" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/><text class="number" x="110" y="543" ></text>
+<path d="M853 594 L853 543 L853 478 L857 399 L850 346" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start)"/><text class="number" x="110" y="543" ></text></svg>

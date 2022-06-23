@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "mdb-ui-kit": "git+https://oauth2:PZXxmv384tZzqP3jkmYs@git.mdbootstrap.com/mdb/standard/mdb-ui-kit-pro-advanced.git"
+  }
+}

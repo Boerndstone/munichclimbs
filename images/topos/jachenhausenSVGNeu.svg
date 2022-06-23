@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="100%" width="100%" viewBox="0 0 1140 650">
+
+	<defs> 	
+		<marker id="dot" viewBox="0 0 25 25" refX="10" refY="10" markerWidth="10" markerHeight="10">       
+			<circle cx="8" cy="8" r="8" fill="#fff" stroke="#000" stroke-width="2"></circle>     
+		</marker>     
+		<marker id="start" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number"></text>     
+		</marker> 
+	<!--<marker id="start0" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number" fill="#fff">1</text>     
+		</marker><marker id="start1" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">2</text>     
+		</marker><marker id="start2" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">3</text>     
+		</marker><marker id="start3" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">4</text>     
+		</marker><marker id="start4" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">5</text>     
+		</marker><marker id="start5" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">6</text>     
+		</marker><marker id="start6" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">7</text>     
+		</marker><marker id="start7" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">8</text>     
+		</marker><marker id="start8" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">9</text>     
+		</marker><marker id="start9" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">10</text>     
+		</marker><marker id="start10" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">11</text>     
+		</marker><marker id="start11" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">12</text>     
+		</marker><marker id="start12" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">13</text>     
+		</marker><marker id="start13" viewBox="0 0 42 42" refX="10" refY="20" markerWidth="20" markerHeight="20">       
+			<rect width="20" height="20" fill="#000"></rect>       
+			<text x="10" y="10" text-anchor="middle" alignment-baseline="central" class="number">14</text>     
+		</marker>--></defs>
+
+  <path id="svg_36" d="m95.725998,561.704956c-16.660004,-63.862335 -22.817001,-217.071381 -10.817001,-241.071381s68.817001,-52.928894 88.817001,-68.928818s36.000015,-34 58.000015,-62s56,-48.000046 74,-68.000099s90,-56 108,-60s84,-6 106,0s72,-2 82,-8s44,-15.999992 72,-33.999989s76,17.999996 116,49.999989s58,44 92,56s149.999939,60.000099 161.999939,92.000099s34,201.999802 34,243.999802s0,94.000397 -38,124.000397s-233.999939,44 -289.999939,40s-322,-10 -374,-10s-268,-8 -280,-54l-0.000015,0z" stroke-width="3" stroke="#000" fill="#F6F4F4"></path>
+  <path id="svg_37" d="m133.725998,515.954651c32,0 93.925003,29.9953 129.925003,15.995239s55.529999,-20.9263 55.529999,-20.9263m242.545013,-261.068756c64,-30 90,-68 124,-78s72,-6 106,0m248.003967,267.999817c-22,0 -116.190002,-1.283997 -156.003967,30c-28,22 -40,48.000061 -66,79.995361s-44,66 -56,74" stroke-width="3" stroke="#000" fill="#F6F4F4"></path>
+
+
+  <path d="m155.000031,587.666687l-1,-68l-3,-76.000031l-5,-128" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start0)" class="route-path"></path>
+  <path d="m235.000031,603.666687l-3,-74l-1,-72.000031l-2,-118l-9,-100.999985" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start1)" class="route-path"></path>
+  <path d="m300.999939,607.666687l-3,-68l-8,-71.000031l-17,-59l-28.999908,-47" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-start="url(#start2)" class="route-path"></path>
+  <path d="m369.999939,608.666687l-7,-169.000031l-10,-95l-10,-86l-6,-73.999985l-3,-57.000008" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start3)" class="route-path"></path>
+  <path d="m424.999939,609.666687l-6,-156.000031l-9,-131l-5,-93.999985l1,-79l-4,-65.000008" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start4)" class="route-path"></path>
+  <path d="m478.999939,609.666687l-8,-157.000031l-7,-115l1,-104.999985l0,-93l-5,-72.000008" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start5)" class="route-path"></path>
+  <path d="m525.000122,616.666687l-3,-136.000031l-4,-122l-1,-95l-3,-105.999985l-4.000061,-93.000008" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start6)" class="route-path"></path>
+  <path d="m599.000122,613.666687l5,-79l-3,-66.000031l-7,-88l1,-86l0,-77.999985l-1,-62l-6,-78.000008" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start7)" class="route-path"></path>
+  <path d="m646.000122,617.666687l3,-111.000031l-1,-120l0,-96l1,-69.999985l0,-69l-5,-100.000008" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start8)" class="route-path"></path>
+  <path d="m696.000122,620.666687l2,-151.000031l0,-130l0,-117.999985l0,-86l-4,-110.000008" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start9)" class="route-path"></path>
+  <path d="m752.000122,623.333313l4,-98l12,-122.999969l-3,-101l4,-87.000015l-4,-73l-8,-91.999992" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start10)" class="route-path"></path>
+  <path d="m831.000122,521.666687l-4,-157.000031l7,-160.999985l4,-99.000008" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start11)" class="route-path"></path>
+  <path d="m931.000122,435.666656l-9,-116l-12,-86.999985l-4,-75" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start12)" class="route-path"></path>
+  <path d="m970.000122,432.666656l6,-105l7,-80.999985l-1,-62" stroke="#E42522" stroke-width="2" stroke-dasharray="20,5" fill="none" marker-end="url(#dot)" marker-start="url(#start13)" class="route-path"></path>
+</svg>
