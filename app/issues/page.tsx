@@ -1,12 +1,13 @@
 import React from "react";
-import { Button, Flex } from "@radix-ui/themes";
+import { Button, Flex, TextField } from "@radix-ui/themes";
+import Link from "next/link";
 
 const IssuesPage = () => {
   return (
     <div>
       <Flex gap="3">
         <Button color="indigo" variant="soft">
-          Edit profile
+          <Link href="/issues/new">New</Link>
         </Button>
         <Button color="cyan" variant="soft">
           Edit profile
