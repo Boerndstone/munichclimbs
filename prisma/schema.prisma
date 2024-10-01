@@ -24,3 +24,51 @@ enum Status {
   IN_PROGRESS
   CLOSED
 }
+
+model Area {
+  id                 Int      @id @default(autoincrement())
+  name               String   @db.VarChar(255)
+  slug               String   @db.VarChar(255)
+  orientation        String   @db.VarChar(25)
+  sequence           Int      @db.SmallInt
+  online             Int      @db.SmallInt
+  image              String   @db.VarChar(25)
+  header_image       String   @db.VarChar(255)
+  lat                Decimal  @db.Decimal(4, 2)
+  lng                Decimal  @db.Decimal(4, 2)
+  zoom               Int      @db.SmallInt
+  rock_resposibility String   @db.VarChar(255)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  rocks              Rock[]
+}
+
+model Rock {
+  id               Int      @id @default(autoincrement())
+  area_id          Int
+  area             Area     @relation(fields: [area_id], references: [id])
+  name             String   @db.VarChar(255)
+  slug             String   @db.VarChar(255)
+  nr               Int      @db.SmallInt
+  description      String?  @db.Text
+  access           String?  @db.Text
+  nature           String?  @db.Text
+  zone             Int?     @db.SmallInt
+  banned           Int?     @db.SmallInt
+  height           Int?     @db.SmallInt
+  orientation      String?  @db.VarChar(50)
+  season           String?  @db.VarChar(50)
+  child_frienly    Int?     @db.SmallInt
+  sunny            Int?     @db.SmallInt
+  rain             Int?     @db.SmallInt
+  image            String?  @db.VarChar(255)
+  header_image     String?  @db.VarChar(255)
+  topo             Int?     @db.SmallInt
+  lat              Decimal? @db.Decimal(10, 6)
+  lng              Decimal? @db.Decimal(10, 6)
+  online           Int      @db.SmallInt
+  path_coordinates Json?
+  zoom             Int?     @db.SmallInt
+  preview_image    String?  @db.VarChar(255)
+  train            Int?     @db.SmallInt
+}
