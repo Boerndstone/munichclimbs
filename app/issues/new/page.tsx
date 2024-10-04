@@ -27,6 +27,16 @@ const NewIssuePage = () => {
   });
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      setSubmitting(true);
+      await axios.post("/api/issues", data);
+      router.push("/issues");
+    } catch (error) {
+      setSubmitting(false);
+      setError("An unexpected error occurred. Please try again later.");
+    }
+  });
   return (
     <div className="max-w-xl">
       {error && (
@@ -38,19 +48,7 @@ const NewIssuePage = () => {
         </Callout.Root>
       )}
 
-      <form
-        className="space-y-3"
-        onSubmit={handleSubmit(async (data) => {
-          try {
-            setSubmitting(true);
-            await axios.post("/api/issues", data);
-            router.push("/issues");
-          } catch (error) {
-            setSubmitting(false);
-            setError("An unexpected error occurred. Please try again later.");
-          }
-        })}
-      >
+      <form className="space-y-3" onSubmit={onSubmit}>
         <TextField.Root placeholder="Search the docs…" {...register("title")}>
           <TextField.Slot>
             <MagnifyingGlassIcon height="16" width="16" />
