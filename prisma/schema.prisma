@@ -41,6 +41,7 @@ model Area {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   rocks              Rock[]
+  Routes             Routes[]
 }
 
 model Rock {
@@ -71,4 +72,42 @@ model Rock {
   zoom             Int?     @db.SmallInt
   preview_image    String?  @db.VarChar(255)
   train            Int?     @db.SmallInt
+  Routes           Routes[]
+  Topo             Topo[]
+}
+
+model Routes {
+  id                  Int      @id @default(autoincrement())
+  area_id             Int
+  area                Area     @relation(fields: [area_id], references: [id])
+  rock_id             Int
+  rock                Rock     @relation(fields: [rock_id], references: [id])
+  name                String   @db.VarChar(255)
+  grade               String   @db.VarChar(20)
+  climbed             Int?     @db.SmallInt
+  first_ascent        String   @db.VarChar(255)
+  year_first_ascent   Int?     @db.SmallInt
+  protecttion         Int?     @db.SmallInt
+  scale               String   @db.VarChar(100)
+  grade_no            Int?     @db.SmallInt
+  rating              Int?     @db.SmallInt
+  topo_id             Int?     @db.SmallInt
+  nr                  Int?     @db.SmallInt
+  relates_to_route_id Int?     @db.SmallInt
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Topo {
+  id          Int      @id @default(autoincrement())
+  rocks_id    Int
+  rock        Rock     @relation(fields: [rocks_id], references: [id])
+  name        String   @db.VarChar(255)
+  image       String   @db.VarChar(255)
+  with_sector Int?     @db.SmallInt
+  svg         String   @db.Text
+  number      Int?     @db.SmallInt
+  topo_image  String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
