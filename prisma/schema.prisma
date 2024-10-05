@@ -42,6 +42,7 @@ model Area {
   updatedAt          DateTime @updatedAt
   rocks              Rock[]
   Routes             Routes[]
+  Video              Video[]
 }
 
 model Rock {
@@ -74,6 +75,7 @@ model Rock {
   train            Int?     @db.SmallInt
   Routes           Routes[]
   Topo             Topo[]
+  Video            Video[]
 }
 
 model Routes {
@@ -96,6 +98,7 @@ model Routes {
   relates_to_route_id Int?     @db.SmallInt
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+  Video               Video[]
 }
 
 model Topo {
@@ -110,4 +113,17 @@ model Topo {
   topo_image  String   @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Video {
+  id             Int      @id @default(autoincrement())
+  video_area_id  Int
+  area           Area     @relation(fields: [video_area_id], references: [id])
+  video_rocks_id Int
+  rock           Rock     @relation(fields: [video_rocks_id], references: [id])
+  video_route_id Int
+  route          Routes   @relation(fields: [video_route_id], references: [id])
+  video_link     String   @db.VarChar(255)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
