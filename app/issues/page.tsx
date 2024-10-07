@@ -1,10 +1,8 @@
 import React from "react";
-import { Button, Flex, Table, TextField } from "@radix-ui/themes";
-
+import { Flex, Table } from "@radix-ui/themes";
 import prisma from "@/prisma/client";
-import IssueStatusBadge from "../components/IssueStatusBadge";
+import { IssueStatusBadge, Link } from "@/app/components";
 import IssueActions from "./IssueActions";
-import Link from "next/link";
 
 const IssuesPage = async () => {
   const issues = await prisma.issue.findMany();
@@ -13,15 +11,6 @@ const IssuesPage = async () => {
       <div className="mb-5">
         <Flex gap="3">
           <IssueActions />
-          <Button color="cyan" variant="soft">
-            Edit profile
-          </Button>
-          <Button color="orange" variant="soft">
-            Edit profile
-          </Button>
-          <Button color="crimson" variant="soft">
-            Edit profile
-          </Button>
         </Flex>
       </div>
       <div>

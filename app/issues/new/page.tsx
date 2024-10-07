@@ -1,6 +1,5 @@
 "use client";
 
-import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
 import { Button, Callout, TextField, Text } from "@radix-ui/themes";
 import { MagnifyingGlassIcon, InfoCircledIcon } from "@radix-ui/react-icons";
@@ -12,6 +11,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createIssueSchema } from "@/app/validationSchemas";
 import { z } from "zod";
 import Spinner from "@/app/components/Spinner";
+import dynamic from "next/dynamic";
+
+const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
+  ssr: false,
+});
 
 type IssueForm = z.infer<typeof createIssueSchema>;
 
