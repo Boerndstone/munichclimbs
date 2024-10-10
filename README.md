@@ -42,3 +42,11 @@ Theme:
 Loading:
 
 - https://github.com/dvtng/react-loading-skeleton#readme
+
+Icons:
+
+- https://github.com/dvtng/react-loading-skeleton#readme
+
+Authetification
+
+- https://next-auth.js.org/
