@@ -1,5 +1,6 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
-
+import { MapPin } from "lucide-react"
+import { fetchAreas } from "@/lib/api"
+import type { Area } from "@/types/area"
 import {
   Sidebar,
   SidebarContent,
@@ -11,53 +12,37 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-// Menu items.
-const items = [
-  {
-    title: "Home",
-    url: "#",
-    icon: Home,
-  },
-  {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-]
+export async function AppSidebar() {
+  const areas: Area[] = await fetchAreas().catch((error) => {
+    console.error("Failed to load areas:", error)
+    return [] as Area[]
+  })
 
-export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Areas</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
+              {areas.length > 0 ? (
+                areas.map((area) => (
+                  <SidebarMenuItem key={area.id}>
+                    <SidebarMenuButton asChild>
+                      <a href={area.url || "#"}>
+                        <MapPin />
+                        <span>{area.name}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+              ) : (
+                <SidebarMenuItem>
+                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                    No areas available
+                  </div>
                 </SidebarMenuItem>
-              ))}
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
