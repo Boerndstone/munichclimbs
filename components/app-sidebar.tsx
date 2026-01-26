@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { MapPin } from "lucide-react"
 import { fetchAreas } from "@/lib/api"
 import type { Area } from "@/types/area"
@@ -22,7 +23,11 @@ export async function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Areas</SidebarGroupLabel>
+          <SidebarGroupLabel asChild>
+            <Link href="/" className="chelsea-market-regular text-[20px] mb-4">
+              munichclimbs
+            </Link>
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {areas.length > 0 ? (
