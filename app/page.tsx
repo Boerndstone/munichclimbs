@@ -3,40 +3,6 @@ import { ArrowUpRightIcon } from "lucide-react"
 
 export default function Home() {
   return (
-    <div>
-      <Button>Click me</Button>
-    <div className="flex flex-col items-start gap-8 sm:flex-row">
-    <div className="flex items-start gap-2">
-      <Button size="xs" variant="outline">
-        Extra Small
-      </Button>
-      <Button size="icon-xs" aria-label="Submit" variant="outline">
-        <ArrowUpRightIcon />
-      </Button>
-    </div>
-    <div className="flex items-start gap-2">
-      <Button size="sm" variant="outline">
-        Small
-      </Button>
-      <Button size="icon-sm" aria-label="Submit" variant="outline">
-        <ArrowUpRightIcon />
-      </Button>
-    </div>
-    <div className="flex items-start gap-2">
-      <Button variant="outline">Default</Button>
-      <Button size="icon" aria-label="Submit" variant="outline">
-        <ArrowUpRightIcon />
-      </Button>
-    </div>
-    <div className="flex items-start gap-2">
-      <Button variant="outline" size="lg">
-        Large
-      </Button>
-      <Button size="icon-lg" aria-label="Submit" variant="outline">
-        <ArrowUpRightIcon />
-      </Button>
-    </div>
-  </div>
-  </div>
+    <h1 className="text-2xl font-medium">Klettergebiete um München</h1>
   )
 }

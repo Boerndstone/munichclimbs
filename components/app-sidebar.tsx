@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { MapPin } from "lucide-react"
 import { fetchAreas } from "@/lib/api"
 import type { Area } from "@/types/area"
@@ -31,16 +32,29 @@ export async function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {areas.length > 0 ? (
-                areas.map((area) => (
-                  <SidebarMenuItem key={area.id}>
-                    <SidebarMenuButton asChild>
-                      <a href={area.url || "#"}>
-                        <MapPin />
-                        <span>{area.name}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))
+                areas.map((area) => {
+                  const imageUrl = area.image
+                  return (
+                    <SidebarMenuItem key={area.id}>
+                      <SidebarMenuButton asChild>
+                        <a href={area.url || "#"}>
+                          {imageUrl ? (
+                            <Image
+                              src={imageUrl}
+                              alt={area.name}
+                              width={16}
+                              height={16}
+                              className="size-4 shrink-0 rounded"
+                            />
+                          ) : (
+                            <MapPin />
+                          )}
+                          <span>{area.name}</span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })
               ) : (
                 <SidebarMenuItem>
                   <div className="px-2 py-1.5 text-sm text-muted-foreground">

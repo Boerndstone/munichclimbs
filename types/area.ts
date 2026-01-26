@@ -3,6 +3,7 @@ export interface Area {
   name: string
   slug?: string
   url?: string
+  image?: string
   [key: string]: unknown // Allow for additional properties from API
 }
 
