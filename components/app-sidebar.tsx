@@ -20,8 +20,6 @@ export async function AppSidebar() {
     return [] as Area[]
   })
 
-  console.log(areas)
-
   return (
     <Sidebar>
       <SidebarContent>
