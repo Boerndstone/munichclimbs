@@ -20,6 +20,8 @@ export async function AppSidebar() {
     return [] as Area[]
   })
 
+  console.log(areas)
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -32,7 +34,7 @@ export async function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {areas.length > 0 ? (
-                areas.map((area) => {
+                areas.filter((area) => area.online === 1).map((area) => {
                   const imageUrl = area.image
                   return (
                     <SidebarMenuItem key={area.id}>
@@ -40,7 +42,7 @@ export async function AppSidebar() {
                         <a href={area.url || "#"}>
                           {imageUrl ? (
                             <Image
-                              src={imageUrl}
+                              src={`https://www.munichclimbs.de/build/images/navigationThumbs/${area.image}.webp`}
                               alt={area.name}
                               width={16}
                               height={16}
