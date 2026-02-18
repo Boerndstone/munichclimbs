@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { fetchAreas } from "@/lib/api"
+import { fetchAreas, fetchRocks } from "@/lib/api"
 import {
   Card,
   CardHeader,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { AreaChart } from "@/components/area-chart"
 
 // Helper function to count routes by grade ranges
 function getRouteStats(routes: unknown[]) {
@@ -54,6 +55,8 @@ export default async function Home() {
     return []
   })
 
+  console.log(areas)
+
   // Filter only online areas
   const onlineAreas = areas.filter((area) => area.online === 1)
 
@@ -80,13 +83,16 @@ export default async function Home() {
               </div>
               <CardHeader>
                 <CardTitle>{area.name}</CardTitle>
+                <CardAction>
+                  <Badge variant="outline">{Array.isArray(area.rocks) ? area.rocks.length : 0} Felsen</Badge>
+                  <Badge variant="outline">{Array.isArray(area.routes) ? area.routes.length : 0} Routen</Badge>
+                </CardAction>
+              </CardHeader>
+              <CardHeader>
                 <CardDescription>
-                  <div className="flex gap-4 mb-4">
-                    <Badge variant="secondary">{Array.isArray(area.rocks) ? area.rocks.length : 0} Felsen</Badge>
-                    <Badge variant="secondary">{Array.isArray(area.routes) ? area.routes.length : 0} Routen</Badge>
-                  </div>
-                  
-                  {Array.isArray(area.routes) && area.routes.length > 0 && (() => {
+                  <div className="mb-5"><AreaChart /></div>
+                
+                  {/* {Array.isArray(area.routes) && area.routes.length > 0 && (() => {
                     const stats = getRouteStats(area.routes)
                     return (
                       <div className="flex justify-between">
@@ -124,11 +130,11 @@ export default async function Home() {
                         </div>
                       </div>
                     )
-                  })()}
+                  })()} */}
                 </CardDescription>
               </CardHeader>
               <CardFooter>
-                <Button className="w-full">Zeige Gebiet</Button>
+                <Button className="w-full">{area.name}</Button>
               </CardFooter>
             </Card>
           </Link>
