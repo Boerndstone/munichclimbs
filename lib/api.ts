@@ -88,4 +88,54 @@ export async function fetchRocks(): Promise<Rock[]> {
     console.error("Error fetching rocks:", error)
     throw error
   }
+}
+
+/** API area item with rocks as returned from /api/areas (hydra) */
+export interface AreaWithRocks {
+  id: number
+  name: string
+  slug?: string
+  image?: string
+  online?: number
+  rocks?: Array<{ "@id": string; name: string; slug?: string }>
+  [key: string]: unknown
+}
+
+/**
+ * Fetches a single area by slug from the API (e.g. Konstein, Altmuehltal).
+ * Matches slug case-insensitively.
+ */
+export async function fetchAreaBySlug(slug: string): Promise<AreaWithRocks | null> {
+  try {
+    const areas = await fetchAreas()
+    const normalized = slug.trim().toLowerCase()
+    const area = areas.find(
+      (a) => a.slug?.toLowerCase() === normalized || a.name?.toLowerCase() === normalized
+    )
+    if (!area) return null
+    // Fetch full area with rocks from /api/areas/{id}
+    const id = typeof area.id === "string" ? parseInt(area.id, 10) : area.id
+    if (Number.isNaN(id)) return null
+    const res = await fetch(`${API_BASE_URL}/areas/${id}`, { cache: "no-store" })
+    if (!res.ok) return null
+    const data = (await res.json()) as AreaWithRocks
+    return data
+  } catch (error) {
+    console.error("Error fetching area by slug:", error)
+    return null
+  }
+}
+
+/**
+ * Returns the total number of routes for a rock (from GET /api/routes?rock={id}).
+ */
+export async function fetchRouteCountForRock(rockId: string | number): Promise<number> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/routes?rock=${rockId}`, { cache: "no-store" })
+    if (!res.ok) return 0
+    const data = (await res.json()) as { "hydra:totalItems"?: number }
+    return data["hydra:totalItems"] ?? 0
+  } catch {
+    return 0
+  }
 } 

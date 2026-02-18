@@ -12,6 +12,20 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { AreaChart } from "@/components/area-chart"
 
+// Area link: /slug or /slugified-name (matches sidebar)
+function getAreaHref(area: { name: string; slug?: string }): string {
+  if (area.slug) return `/${area.slug}`
+  const slug = area.name
+    .toLowerCase()
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+  return `/${slug || "area"}`
+}
+
 // Helper function to count routes by grade ranges
 function getRouteStats(routes: unknown[]) {
   if (!Array.isArray(routes)) {
@@ -65,7 +79,7 @@ export default async function Home() {
       <h1 className="text-2xl font-medium">Klettergebiete um München</h1>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {onlineAreas.map((area) => (
-          <Link key={area.id} href={area.url || "#"}>
+          <Link key={area.id} href={getAreaHref(area)}>
             <Card className="overflow-hidden transition-shadow hover:shadow-md pt-0">
               <div className="relative aspect-video w-full">
                 <picture>
