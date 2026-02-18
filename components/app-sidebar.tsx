@@ -4,13 +4,18 @@ import type { Area } from "@/types/area"
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarGroupAction,
+  SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { CollapsibleAreaItem } from "@/components/collapsible-area-item"
+import { ChartBar } from "lucide-react"
 
 export async function AppSidebar() {
   const areas: Area[] = await fetchAreas().catch((error) => {
@@ -43,7 +48,38 @@ export async function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <SidebarSeparator />
+        <SidebarGroup>
+          <SidebarGroupLabel>Kontakt</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/datenschutz">
+                  <ChartBar /> Datenschutz
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href="/impressum">
+                  <ChartBar /> Impressum
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton>
+              Username
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }
