@@ -54,8 +54,13 @@ export function CollapsibleAreaItem({ area }: CollapsibleAreaItemProps) {
           <CollapsibleContent>
             <SidebarMenuSub>
               {rocks.map((rock: { id?: string | number; name?: string; url?: string; slug?: string; [key: string]: unknown }) => {
-                const areaSlug = area.slug ?? area.name?.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") ?? "area"
-                const rockUrl = rock.slug ? `/${areaSlug}/${rock.slug}` : (rock.id ? `/${areaSlug}/${rock.id}` : "#")
+                const areaSlug = area.slug
+                const rockUrl =
+                  areaSlug && (rock.slug || rock.id)
+                    ? rock.slug
+                      ? `/${areaSlug}/${rock.slug}`
+                      : `/${areaSlug}/${rock.id}`
+                    : rock.url || "#"
                 const rockName = rock.name || String(rock.id || "")
                 return (
                   <SidebarMenuSubItem key={rock.id || rockName}>
