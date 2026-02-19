@@ -11,7 +11,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarGroupAction,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { CollapsibleAreaItem } from "@/components/collapsible-area-item"
