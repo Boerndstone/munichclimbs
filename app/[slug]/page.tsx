@@ -33,7 +33,13 @@ export default async function AreaPage({ params }: Props) {
   const rocksWithCounts = await Promise.all(
     rocks.map(async (rock) => {
       const rockId = extractRockId(rock["@id"])
-      const routeCount = rockId ? await fetchRouteCountForRock(rockId) : 0
+      const rockRouteCount = typeof rock.routeCount === "number" ? rock.routeCount : null
+      const routeCount =
+        rockRouteCount !== null
+          ? rockRouteCount
+          : rockId
+            ? await fetchRouteCountForRock(rockId)
+            : 0
       return {
         id: rockId,
         name: rock.name,
