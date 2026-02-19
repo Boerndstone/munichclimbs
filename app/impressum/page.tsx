@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: "Impressum von munichclimbs",
 }
 
-export default function DatenschutzPage() {
+export default function ImpressumPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-medium">Impressum</h1>
