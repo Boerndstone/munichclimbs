@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Datenschutz",
-  description: "Datenschutzerklärung von munichclimbs",
+  title: "Impressum",
+  description: "Impressum von munichclimbs",
 }
 
 export default function DatenschutzPage() {
