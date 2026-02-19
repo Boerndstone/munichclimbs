@@ -91,12 +91,7 @@ export async function fetchRocks(): Promise<Rock[]> {
 }
 
 /** API area item with rocks as returned from /api/areas (hydra) */
-export interface AreaWithRocks {
-  id: number
-  name: string
-  slug?: string
-  image?: string
-  online?: number
+export interface AreaWithRocks extends Area {
   rocks?: Array<{ "@id": string; name: string; slug?: string }>
   [key: string]: unknown
 }
