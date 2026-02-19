@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { MapPin, ChevronRight } from "lucide-react"
 import type { Area } from "@/types/area"
+import { getAreaSlug } from "@/lib/slugify"
 import {
   SidebarMenuItem,
   SidebarMenuButton,
@@ -54,9 +55,9 @@ export function CollapsibleAreaItem({ area }: CollapsibleAreaItemProps) {
           <CollapsibleContent>
             <SidebarMenuSub>
               {rocks.map((rock: { id?: string | number; name?: string; url?: string; slug?: string; [key: string]: unknown }) => {
-                const areaSlug = area.slug
+                const areaSlug = getAreaSlug(area)
                 const rockUrl =
-                  areaSlug && (rock.slug || rock.id)
+                  (rock.slug || rock.id)
                     ? rock.slug
                       ? `/${areaSlug}/${rock.slug}`
                       : `/${areaSlug}/${rock.id}`

@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { fetchAreas, fetchRocks } from "@/lib/api"
+import { getAreaSlug } from "@/lib/slugify"
 import {
   Card,
   CardHeader,
@@ -12,18 +13,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { AreaChart } from "@/components/area-chart"
 
-// Area link: /slug or /slugified-name (matches sidebar)
 function getAreaHref(area: { name: string; slug?: string }): string {
-  if (area.slug) return `/${area.slug}`
-  const slug = area.name
-    .toLowerCase()
-    .replace(/ä/g, "ae")
-    .replace(/ö/g, "oe")
-    .replace(/ü/g, "ue")
-    .replace(/ß/g, "ss")
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "")
-  return `/${slug || "area"}`
+  return `/${getAreaSlug(area)}`
 }
 
 // Helper function to count routes by grade ranges

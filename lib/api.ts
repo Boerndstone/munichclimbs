@@ -1,5 +1,6 @@
 import type { Area, AreasResponse } from "@/types/area"
 import type { Rock, RocksResponse } from "@/types/rock"
+import { getAreaSlug, slugifyAreaName } from "@/lib/slugify"
 
 const API_BASE_URL = "https://munichclimbs.com/api"
 
@@ -98,15 +99,13 @@ export interface AreaWithRocks extends Area {
 
 /**
  * Fetches a single area by slug from the API (e.g. Konstein, Altmuehltal).
- * Matches slug case-insensitively.
+ * Uses shared slugifyAreaName/getAreaSlug so URL and lookup stay consistent.
  */
 export async function fetchAreaBySlug(slug: string): Promise<AreaWithRocks | null> {
   try {
     const areas = await fetchAreas()
-    const normalized = slug.trim().toLowerCase()
-    const area = areas.find(
-      (a) => a.slug?.toLowerCase() === normalized || a.name?.toLowerCase() === normalized
-    )
+    const normalized = slugifyAreaName(slug.trim())
+    const area = areas.find((a) => getAreaSlug(a) === normalized)
     if (!area) return null
     // Fetch full area with rocks from /api/areas/{id}
     const id = typeof area.id === "string" ? parseInt(area.id, 10) : area.id
