@@ -150,3 +150,16 @@
     font-style: normal;
   }
 }
+
+/* Area pages render their hero directly below the fixed navigation. This mirrors
+   the legacy page structure and lets the hero and rock grid share the nav width. */
+main:has(.area-page) {
+  max-width: none;
+  padding: 50px 0 2rem;
+}
+
+main:has(.area-page) > div {
+  max-width: none;
+  gap: 0;
+  padding: 0;
+}

@@ -4,6 +4,7 @@ export interface Area {
   slug?: string
   url?: string
   image?: string
+  headerImage?: string | null
   online?: number
   [key: string]: unknown // Allow for additional properties from API
 }

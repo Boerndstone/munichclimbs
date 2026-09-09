@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { fetchAreaBySlug, fetchRocksForArea, fetchRoutesForArea } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
 import { RockListCard } from "@/components/rock-list-card"
+import { AreaHero } from "@/components/area-hero"
 import type { Metadata } from "next"
 
 type Props = { params: Promise<{ slug: string }> }
@@ -46,25 +47,24 @@ export default async function AreaPage({ params }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-2xl font-medium">{area.name}</h1>
-      </div>
+    <div className="area-page">
+      <div className="mx-auto w-full max-w-[1024px] px-2">
+        <AreaHero name={area.name} headerImage={area.headerImage} />
 
-      <section>
-        <h2 className="text-lg font-semibold mb-3">Felsen</h2>
-        <ul className="space-y-2">
-          {rocks.map((rock) => (
-            <RockListCard
-              key={rock.id}
-              areaName={area.name}
-              areaSlug={slug}
-              rock={rock}
-              routes={routesByRock.get(String(rock.id)) ?? []}
-            />
-          ))}
-        </ul>
-      </section>
+        <section className="my-4">
+          <ul className="space-y-2">
+            {rocks.map((rock) => (
+              <RockListCard
+                key={rock.id}
+                areaName={area.name}
+                areaSlug={slug}
+                rock={rock}
+                routes={routesByRock.get(String(rock.id)) ?? []}
+              />
+            ))}
+          </ul>
+        </section>
+      </div>
     </div>
   )
 }
