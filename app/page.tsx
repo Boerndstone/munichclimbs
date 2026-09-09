@@ -1,5 +1,11 @@
 import { AreaCard } from "@/components/area-card"
 import { fetchAreas, fetchRoutesForArea } from "@/lib/api"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: { absolute: "Munichclimbs" },
+  description: "Klettern rund um München. Klettergebiete, Felsen und Touren im Überblick.",
+}
 
 export default async function Home() {
   const areas = await fetchAreas().catch((error) => {

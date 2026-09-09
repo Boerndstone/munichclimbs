@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   )
   if (!rock) return { title: "Rock not found" }
   return {
-    title: `${rock.name} – ${area.name}`,
+    title: { absolute: `Munichclimbs | Klettergebiet ${area.name} | Fels ${rock.name}` },
     description: `Felsen ${rock.name} im Klettergebiet ${area.name}`,
   }
 }

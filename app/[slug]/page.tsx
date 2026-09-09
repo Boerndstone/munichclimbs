@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const area = await fetchAreaBySlug(slug)
   if (!area) return { title: "Area not found" }
   return {
-    title: area.name,
+    title: { absolute: `Munichclimbs | Klettergebiet ${area.name}` },
     description: `Klettergebiet ${area.name} – Felsen und Routen`,
   }
 }
