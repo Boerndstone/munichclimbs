@@ -183,7 +183,7 @@ export async function fetchRocksForArea(areaId: string | number): Promise<Rock[]
 export async function fetchRoutesForArea(areaId: string | number): Promise<RouteSummary[]> {
   try {
     return await fetchHydraCollection<RouteSummary>(
-      `${API_BASE_URL}/routes?area.id=${encodeURIComponent(String(areaId))}`
+      `${API_BASE_URL}/routes?area.id=${encodeURIComponent(String(areaId))}&itemsPerPage=100`
     )
   } catch (error) {
     console.error("Error fetching routes for area:", error)
