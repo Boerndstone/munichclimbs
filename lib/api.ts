@@ -97,6 +97,39 @@ export interface AreaWithRocks extends Area {
   [key: string]: unknown
 }
 
+export interface RouteSummary {
+  id: number
+  grade?: string | null
+  gradeNo?: number | null
+  scale?: string | null
+  rock?: { "@id"?: string; id?: number }
+}
+
+interface HydraCollection<T> {
+  "hydra:member"?: T[]
+  "hydra:view"?: { "hydra:next"?: string }
+}
+
+async function fetchHydraCollection<T>(url: string): Promise<T[]> {
+  const items: T[] = []
+  let nextUrl: string | undefined = url
+
+  // Follow API Platform's pagination links so a busy area does not lose routes.
+  while (nextUrl) {
+    const response = await fetch(nextUrl, { cache: "no-store" })
+    if (!response.ok) {
+      throw new Error(`Failed to fetch collection: ${response.status}`)
+    }
+
+    const data = (await response.json()) as HydraCollection<T>
+    items.push(...(data["hydra:member"] ?? []))
+    const next = data["hydra:view"]?.["hydra:next"]
+    nextUrl = next ? new URL(next, API_BASE_URL).toString() : undefined
+  }
+
+  return items
+}
+
 /**
  * Fetches a single area by slug from the API (e.g. Konstein, Altmuehltal).
  * Uses shared slugifyAreaName/getAreaSlug so URL and lookup stay consistent.
@@ -132,4 +165,28 @@ export async function fetchRouteCountForRock(rockId: string | number): Promise<n
   } catch {
     return 0
   }
-} 
+}
+
+/** Fetches the published rocks belonging to an area, including their display metadata. */
+export async function fetchRocksForArea(areaId: string | number): Promise<Rock[]> {
+  try {
+    return await fetchHydraCollection<Rock>(
+      `${API_BASE_URL}/rocks?area.id=${encodeURIComponent(String(areaId))}`
+    )
+  } catch (error) {
+    console.error("Error fetching rocks for area:", error)
+    return []
+  }
+}
+
+/** Fetches all published routes for an area so the rock list can show grade distributions. */
+export async function fetchRoutesForArea(areaId: string | number): Promise<RouteSummary[]> {
+  try {
+    return await fetchHydraCollection<RouteSummary>(
+      `${API_BASE_URL}/routes?area.id=${encodeURIComponent(String(areaId))}`
+    )
+  } catch (error) {
+    console.error("Error fetching routes for area:", error)
+    return []
+  }
+}
