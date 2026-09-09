@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Chelsea_Market } from "next/font/google";
 import "./globals.css";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
+import { SiteNavigation } from "@/components/site-navigation"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,22 +34,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${chelseaMarket.variable} antialiased`}
       >
-        <SidebarProvider>
-          <AppSidebar />
-          <main className="flex flex-1 flex-col">
-            <div className="container-wrapper flex flex-1 flex-col px-2">
-            <SidebarTrigger />
-              <div className="flex scroll-mt-24 items-stretch pb-8 text-[1.05rem] sm:text-[15px] xl:w-full">
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <div className="h-(--top-spacing) shrink-0"></div>
-                  <div className="ms-5 flex w-full max-w-[50rem] min-w-0 flex-1 flex-col gap-6 px-4 py-6 text-neutral-800 md:px-0 lg:py-8 dark:text-neutral-300">
-                    {children}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </main>
-        </SidebarProvider>
+        <SiteNavigation />
+        <main className="mx-auto flex min-h-svh w-full max-w-[1024px] flex-col px-4 pb-8 pt-[74px] text-[1.05rem] sm:text-[15px]">
+          <div className="flex w-full max-w-[50rem] flex-1 flex-col gap-6 py-6 lg:py-8">
+            {children}
+          </div>
+        </main>
       </body>
     </html>
   );

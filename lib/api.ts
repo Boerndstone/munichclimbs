@@ -2,7 +2,7 @@ import type { Area, AreasResponse } from "@/types/area"
 import type { Rock, RocksResponse } from "@/types/rock"
 import { getAreaSlug, slugifyAreaName } from "@/lib/slugify"
 
-const API_BASE_URL = "https://munichclimbs.com/api"
+const API_BASE_URL = "https://www.munichclimbs.de/api/v1"
 
 /**
  * Fetches areas from the API
@@ -93,7 +93,7 @@ export async function fetchRocks(): Promise<Rock[]> {
 
 /** API area item with rocks as returned from /api/areas (hydra) */
 export interface AreaWithRocks extends Area {
-  rocks?: Array<{ "@id": string; name: string; slug?: string }>
+  rocks?: Array<{ "@id": string; name: string; slug?: string; routeCount?: number }>
   [key: string]: unknown
 }
 
@@ -121,11 +121,11 @@ export async function fetchAreaBySlug(slug: string): Promise<AreaWithRocks | nul
 }
 
 /**
- * Returns the total number of routes for a rock (from GET /api/routes?rock={id}).
+ * Returns the total number of routes for a rock (from GET /api/v1/routes?rock.id={id}).
  */
 export async function fetchRouteCountForRock(rockId: string | number): Promise<number> {
   try {
-    const res = await fetch(`${API_BASE_URL}/routes?rock=${rockId}`, { cache: "no-store" })
+    const res = await fetch(`${API_BASE_URL}/routes?rock.id=${rockId}`, { cache: "no-store" })
     if (!res.ok) return 0
     const data = (await res.json()) as { "hydra:totalItems"?: number }
     return data["hydra:totalItems"] ?? 0
