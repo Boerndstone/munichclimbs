@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChartNoAxesCombined, ChevronRight, Menu, Moon, Search, Settings, Sun, X } from "lucide-react"
+import { ChartNoAxesCombined, ChevronRight, Menu, Moon, Search, Settings, Sun } from "lucide-react"
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Button } from "@/components/ui/button"
 import { getAreaSlug } from "@/lib/slugify"
 import type { Area } from "@/types/area"
 
@@ -26,9 +28,10 @@ function NavigationArea({ area }: { area: Area }) {
   const isCurrentArea = pathname === areaPath || pathname.startsWith(`${areaPath}/`)
 
   return (
-    <li>
-      <details className="group" open={isCurrentArea}>
-        <summary className="flex cursor-pointer list-none items-center gap-2 rounded-md px-2 py-2 text-sm text-foreground hover:bg-accent [&::-webkit-details-marker]:hidden">
+    <Collapsible asChild defaultOpen={isCurrentArea}>
+      <li>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" className="h-auto w-full justify-start gap-2 px-2 py-2 text-left text-sm font-normal text-foreground">
           {area.image ? (
             <img
               src={`https://www.munichclimbs.de/build/images/navigationThumbs/${area.image}.webp`}
@@ -38,10 +41,11 @@ function NavigationArea({ area }: { area: Area }) {
           ) : (
             <span className="size-[18px] shrink-0 rounded bg-muted" aria-hidden="true" />
           )}
-          <span className="min-w-0 flex-1 truncate">{area.name}</span>
-          <ChevronRight className="size-4 shrink-0 transition-transform duration-200 group-open:rotate-90" aria-hidden="true" />
-        </summary>
-        <div className="pb-1 pl-7 pr-2">
+          <span className="min-w-0 flex-1 truncate text-left">{area.name}</span>
+          <ChevronRight className="size-4 shrink-0 transition-transform duration-200 data-[state=open]:rotate-90" aria-hidden="true" />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pb-1 pl-7 pr-2">
           <Link
             href={areaPath}
             className={`block rounded-md px-2 py-1.5 text-sm ${pathname === areaPath ? "bg-accent font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}
@@ -64,9 +68,9 @@ function NavigationArea({ area }: { area: Area }) {
               </Link>
             )
           })}
-        </div>
-      </details>
-    </li>
+        </CollapsibleContent>
+      </li>
+    </Collapsible>
   )
 }
 
@@ -105,15 +109,10 @@ export function NavigationMenu({ areas }: { areas: Area[] }) {
             <SheetContent side="left" className="w-[min(100vw,20rem)] gap-0 p-0 sm:max-w-none">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <div className="flex h-full min-h-0 flex-col bg-background">
-                <div className="flex shrink-0 items-center justify-between border-b border-border px-3 py-2">
+                <div className="flex shrink-0 items-center border-b border-border px-3 py-2">
                   <Link href="/" className="chelsea-market-regular text-lg no-underline">
                     munichclimbs
                   </Link>
-                  <SheetClose asChild>
-                    <button className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Navigation schließen">
-                      <X className="size-5" />
-                    </button>
-                  </SheetClose>
                 </div>
                 <div className="min-h-0 flex-1 overflow-y-auto px-1 py-2">
                   <ul className="m-0 list-none p-0">
