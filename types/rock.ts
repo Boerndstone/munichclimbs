@@ -4,7 +4,10 @@ export interface Rock {
   slug?: string
   url?: string
   image?: string
-  online?: number
+  previewImage?: string
+  height?: number | null
+  orientation?: string | null
+  online?: boolean | number
   [key: string]: unknown // Allow for additional properties from API
 }
 

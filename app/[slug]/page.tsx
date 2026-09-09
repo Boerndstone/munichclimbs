@@ -1,7 +1,7 @@
-import Link from "next/link"
 import { notFound } from "next/navigation"
-import { fetchAreaBySlug, fetchRouteCountForRock } from "@/lib/api"
+import { fetchAreaBySlug, fetchRocksForArea, fetchRoutesForArea } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
+import { RockListCard } from "@/components/rock-list-card"
 import type { Metadata } from "next"
 
 type Props = { params: Promise<{ slug: string }> }
@@ -29,49 +29,39 @@ export default async function AreaPage({ params }: Props) {
     notFound()
   }
 
-  const rocks = Array.isArray(area.rocks) ? area.rocks : []
-  const rocksWithCounts = await Promise.all(
-    rocks.map(async (rock) => {
-      const rockId = extractRockId(rock["@id"])
-      const rockRouteCount = typeof rock.routeCount === "number" ? rock.routeCount : null
-      const routeCount =
-        rockRouteCount !== null
-          ? rockRouteCount
-          : rockId
-            ? await fetchRouteCountForRock(rockId)
-            : 0
-      return {
-        id: rockId,
-        name: rock.name,
-        slug: rock.slug,
-        routeCount,
-      }
-    })
-  )
-
-  const totalRoutes = rocksWithCounts.reduce((sum, r) => sum + r.routeCount, 0)
+  const areaId = typeof area.id === "number" || typeof area.id === "string"
+    ? area.id
+    : extractRockId(String(area["@id"] ?? ""))
+  const [rocks, routes] = await Promise.all([
+    fetchRocksForArea(areaId),
+    fetchRoutesForArea(areaId),
+  ])
+  const routesByRock = new Map<string, typeof routes>()
+  for (const route of routes) {
+    const rockId = route.rock?.id?.toString() ?? extractRockId(route.rock?.["@id"] ?? "")
+    if (!rockId) continue
+    const rockRoutes = routesByRock.get(rockId) ?? []
+    rockRoutes.push(route)
+    routesByRock.set(rockId, rockRoutes)
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="text-2xl font-medium">{area.name}</h1>
-        <Badge variant="secondary">{rocks.length} Felsen</Badge>
-        <Badge variant="secondary">{totalRoutes} Routen</Badge>
       </div>
 
       <section>
         <h2 className="text-lg font-semibold mb-3">Felsen</h2>
         <ul className="space-y-2">
-          {rocksWithCounts.map((rock) => (
-            <li key={rock.id}>
-              <Link
-                href={rock.slug ? `/${slug}/${rock.slug}` : `/${slug}/${rock.id}`}
-                className="flex items-center justify-between rounded-md border border-transparent px-3 py-2 text-sm hover:bg-muted/50 hover:border-border"
-              >
-                <span>{rock.name}</span>
-                <Badge variant="outline">{rock.routeCount} Routen</Badge>
-              </Link>
-            </li>
+          {rocks.map((rock) => (
+            <RockListCard
+              key={rock.id}
+              areaName={area.name}
+              areaSlug={slug}
+              rock={rock}
+              routes={routesByRock.get(String(rock.id)) ?? []}
+            />
           ))}
         </ul>
       </section>
