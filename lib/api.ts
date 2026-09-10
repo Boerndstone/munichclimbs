@@ -105,6 +105,14 @@ export interface RouteSummary {
   rock?: { "@id"?: string; id?: number }
 }
 
+export interface TopoSummary {
+  id: number
+  name: string
+  image?: string | null
+  updatedAt?: string | null
+  rocks?: string | { "@id"?: string; id?: number; name?: string; slug?: string }
+}
+
 interface HydraCollection<T> {
   "hydra:member"?: T[]
   "hydra:view"?: { "hydra:next"?: string }
@@ -128,6 +136,23 @@ async function fetchHydraCollection<T>(url: string): Promise<T[]> {
   }
 
   return items
+}
+
+/** Returns the most recently updated public topo with a usable drawing and image. */
+export async function fetchLatestTopo(): Promise<TopoSummary | null> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/topos?order[updatedAt]=desc&itemsPerPage=1`,
+      { cache: "no-store" }
+    )
+    if (!response.ok) return null
+
+    const data = (await response.json()) as HydraCollection<TopoSummary>
+    return data["hydra:member"]?.[0] ?? null
+  } catch (error) {
+    console.error("Error fetching latest topo:", error)
+    return null
+  }
 }
 
 /**
