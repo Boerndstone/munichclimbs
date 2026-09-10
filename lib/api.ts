@@ -113,6 +113,25 @@ export interface TopoSummary {
   rocks?: string | { "@id"?: string; id?: number; name?: string; slug?: string }
 }
 
+type ApiReference = { "@id"?: string; id?: number; name?: string }
+
+export interface LatestRouteSummary {
+  id: number
+  name: string
+  grade?: string | null
+  yearFirstAscent?: number | null
+  rock?: string | ApiReference
+  area?: string | ApiReference
+}
+
+export interface BannedRockSummary {
+  id: number
+  name: string
+  slug?: string
+  banned?: number | null
+  area?: string | ApiReference
+}
+
 interface HydraCollection<T> {
   "hydra:member"?: T[]
   "hydra:view"?: { "hydra:next"?: string }
@@ -152,6 +171,37 @@ export async function fetchLatestTopo(): Promise<TopoSummary | null> {
   } catch (error) {
     console.error("Error fetching latest topo:", error)
     return null
+  }
+}
+
+/** Returns the five newest public routes, ordered like the Munich homepage. */
+export async function fetchLatestRoutes(): Promise<LatestRouteSummary[]> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/routes?order[yearFirstAscent]=desc&itemsPerPage=5`,
+      { cache: "no-store" }
+    )
+    if (!response.ok) return []
+
+    const data = (await response.json()) as HydraCollection<LatestRouteSummary>
+    return (data["hydra:member"] ?? []).slice(0, 5)
+  } catch (error) {
+    console.error("Error fetching latest routes:", error)
+    return []
+  }
+}
+
+/** Returns publicly visible rocks that have a seasonal closure. */
+export async function fetchBannedRocks(): Promise<BannedRockSummary[]> {
+  try {
+    const [spring, summer] = await Promise.all([
+      fetchHydraCollection<BannedRockSummary>(`${API_BASE_URL}/rocks?banned=1`),
+      fetchHydraCollection<BannedRockSummary>(`${API_BASE_URL}/rocks?banned=2`),
+    ])
+    return [...spring, ...summer]
+  } catch (error) {
+    console.error("Error fetching seasonal closures:", error)
+    return []
   }
 }
 
