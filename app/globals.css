@@ -163,3 +163,8 @@ main:has(.area-page) > div {
   gap: 0;
   padding: 0;
 }
+
+/* The homepage uses the same full-width, 12-column content grid as Munich. */
+main:has(.home-page) > div {
+  max-width: none;
+}
