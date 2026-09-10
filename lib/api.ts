@@ -3,6 +3,9 @@ import type { Rock, RocksResponse } from "@/types/rock"
 import { getAreaSlug, slugifyAreaName } from "@/lib/slugify"
 
 const API_BASE_URL = "https://www.munichclimbs.de/api/v1"
+// Public climbing data changes infrequently. Revalidate in the background instead
+// of blocking every page transition on a round trip to the Symfony API.
+const API_FETCH_OPTIONS = { next: { revalidate: 300 } } as const
 
 /**
  * Fetches areas from the API
@@ -11,9 +14,7 @@ const API_BASE_URL = "https://www.munichclimbs.de/api/v1"
  */
 export async function fetchAreas(): Promise<Area[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/areas`, {
-      cache: 'no-store',
-    })
+    const response = await fetch(`${API_BASE_URL}/areas`, API_FETCH_OPTIONS)
 
     if (!response.ok) {
       throw new Error(`Failed to fetch areas: ${response.status} ${response.statusText}`)
@@ -53,9 +54,7 @@ export async function fetchAreas(): Promise<Area[]> {
 
 export async function fetchRocks(): Promise<Rock[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/rocks`, {
-      cache: 'no-store',
-    })
+    const response = await fetch(`${API_BASE_URL}/rocks`, API_FETCH_OPTIONS)
 
     if (!response.ok) {
       throw new Error(`Failed to fetch rocks: ${response.status} ${response.statusText}`)
@@ -143,7 +142,7 @@ async function fetchHydraCollection<T>(url: string): Promise<T[]> {
 
   // Follow API Platform's pagination links so a busy area does not lose routes.
   while (nextUrl) {
-    const response = await fetch(nextUrl, { cache: "no-store" })
+    const response = await fetch(nextUrl, API_FETCH_OPTIONS)
     if (!response.ok) {
       throw new Error(`Failed to fetch collection: ${response.status}`)
     }
@@ -162,7 +161,7 @@ export async function fetchLatestTopo(): Promise<TopoSummary | null> {
   try {
     const response = await fetch(
       `${API_BASE_URL}/topos?order[updatedAt]=desc&itemsPerPage=1`,
-      { cache: "no-store" }
+      API_FETCH_OPTIONS
     )
     if (!response.ok) return null
 
@@ -179,7 +178,7 @@ export async function fetchLatestRoutes(): Promise<LatestRouteSummary[]> {
   try {
     const response = await fetch(
       `${API_BASE_URL}/routes?order[yearFirstAscent]=desc&itemsPerPage=5`,
-      { cache: "no-store" }
+      API_FETCH_OPTIONS
     )
     if (!response.ok) return []
 
@@ -218,7 +217,7 @@ export async function fetchAreaBySlug(slug: string): Promise<AreaWithRocks | nul
     // Fetch full area with rocks from /api/areas/{id}
     const id = typeof area.id === "string" ? parseInt(area.id, 10) : area.id
     if (Number.isNaN(id)) return null
-    const res = await fetch(`${API_BASE_URL}/areas/${id}`, { cache: "no-store" })
+    const res = await fetch(`${API_BASE_URL}/areas/${id}`, API_FETCH_OPTIONS)
     if (!res.ok) return null
     const data = (await res.json()) as AreaWithRocks
     return data
@@ -233,7 +232,7 @@ export async function fetchAreaBySlug(slug: string): Promise<AreaWithRocks | nul
  */
 export async function fetchRouteCountForRock(rockId: string | number): Promise<number> {
   try {
-    const res = await fetch(`${API_BASE_URL}/routes?rock.id=${rockId}`, { cache: "no-store" })
+    const res = await fetch(`${API_BASE_URL}/routes?rock.id=${rockId}`, API_FETCH_OPTIONS)
     if (!res.ok) return 0
     const data = (await res.json()) as { "hydra:totalItems"?: number }
     return data["hydra:totalItems"] ?? 0
