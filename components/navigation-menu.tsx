@@ -26,9 +26,14 @@ function NavigationArea({ area }: { area: Area }) {
   const areaPath = `/${areaSlug}`
   const rocks = Array.isArray(area.rocks) ? (area.rocks as NavigationRock[]) : []
   const isCurrentArea = pathname === areaPath || pathname.startsWith(`${areaPath}/`)
+  const [isOpen, setIsOpen] = useState(isCurrentArea)
+
+  useEffect(() => {
+    if (isCurrentArea) setIsOpen(true)
+  }, [isCurrentArea])
 
   return (
-    <Collapsible asChild defaultOpen={isCurrentArea}>
+    <Collapsible asChild open={isOpen} onOpenChange={setIsOpen}>
       <li>
         <CollapsibleTrigger asChild>
           <Button variant="ghost" className="h-auto w-full justify-start gap-2 px-2 py-2 text-left text-sm font-normal text-foreground">
@@ -42,7 +47,7 @@ function NavigationArea({ area }: { area: Area }) {
             <span className="size-[18px] shrink-0 rounded bg-muted" aria-hidden="true" />
           )}
           <span className="min-w-0 flex-1 truncate text-left">{area.name}</span>
-          <ChevronRight className="size-4 shrink-0 transition-transform duration-200 data-[state=open]:rotate-90" aria-hidden="true" />
+          <ChevronRight className={`size-4 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} aria-hidden="true" />
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="pb-1 pl-7 pr-2">
