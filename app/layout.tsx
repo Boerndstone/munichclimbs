@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Chelsea_Market } from "next/font/google";
 import "./globals.css";
 import { SiteNavigation } from "@/components/site-navigation"
+import { SiteFooter } from "@/components/site-footer"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,14 +41,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${chelseaMarket.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${chelseaMarket.variable} flex min-h-svh flex-col antialiased`}
       >
         <SiteNavigation />
-        <main className="mx-auto flex min-h-svh w-full max-w-[1024px] flex-col px-4 pb-8 pt-[74px] text-[1.05rem] sm:text-[15px]">
+        <main className="mx-auto flex w-full max-w-[1024px] flex-1 flex-col px-4 pb-8 pt-[74px] text-[1.05rem] sm:text-[15px]">
           <div className="flex w-full flex-1 flex-col gap-6 py-6 lg:py-8">
             {children}
           </div>
         </main>
+        <SiteFooter />
       </body>
     </html>
   );
