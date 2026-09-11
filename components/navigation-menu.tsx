@@ -54,7 +54,7 @@ function NavigationArea({ area }: { area: Area }) {
         <CollapsibleContent className="pb-1 pl-7 pr-2">
           <Link
             href={areaPath}
-            className={`block rounded-md px-2 py-1.5 text-sm ${pathname === areaPath ? "bg-accent font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}
+            className={`block rounded-md px-2 py-1.5 text-sm ${pathname === areaPath ? "bg-accent font-medium text-foreground" : "text-black hover:bg-accent hover:text-foreground"}`}
           >
             Übersicht
           </Link>
@@ -68,7 +68,7 @@ function NavigationArea({ area }: { area: Area }) {
                 key={String(rock.id ?? rockSlug)}
                 href={rockPath}
                 aria-current={pathname === rockPath ? "page" : undefined}
-                className={`block truncate rounded-md px-2 py-1.5 text-sm ${pathname === rockPath ? "bg-accent font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}
+                className={`block truncate rounded-md px-2 py-1.5 text-sm ${pathname === rockPath ? "bg-accent font-medium text-foreground" : "text-black hover:bg-accent hover:text-foreground"}`}
               >
                 {rock.name ?? String(rockSlug)}
               </Link>
