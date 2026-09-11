@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChartNoAxesCombined, ChevronRight, Menu, Moon, Search, Settings, Sun } from "lucide-react"
+import { ChartNoAxesCombined, ChevronRight, Menu, Moon, Settings, Sun } from "lucide-react"
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { getAreaSlug } from "@/lib/slugify"
 import type { Area } from "@/types/area"
+import { SearchModal } from "@/components/search-modal"
 
 type NavigationRock = {
   id?: string | number
@@ -136,10 +137,7 @@ export function NavigationMenu({ areas }: { areas: Area[] }) {
           <Link href="/" className="chelsea-market-regular hidden text-xl leading-tight no-underline md:inline">munichclimbs</Link>
         </div>
 
-        <div className="flex min-w-0 flex-1 items-center rounded-md border border-border bg-muted px-2 py-1.5 text-sm text-muted-foreground" aria-label="Suche">
-          <Search className="mr-2 size-4 shrink-0" aria-hidden="true" />
-          <span className="truncate">Suche</span>
-        </div>
+        <SearchModal areas={visibleAreas} />
 
         <div className="relative shrink-0">
           <button onClick={() => setSettingsOpen((open) => !open)} className="inline-flex size-9 items-center justify-center rounded-md hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-expanded={settingsOpen} aria-label="Einstellungen öffnen">
