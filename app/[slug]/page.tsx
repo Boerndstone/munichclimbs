@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 import { fetchAreaBySlug, fetchRocksForArea, fetchRoutesForArea } from "@/lib/api"
-import { Badge } from "@/components/ui/badge"
-import { RockListCard } from "@/components/rock-list-card"
+import { AreaRockList } from "@/components/area-rock-list"
 import { AreaHero } from "@/components/area-hero"
 import type { Metadata } from "next"
 
@@ -52,17 +51,14 @@ export default async function AreaPage({ params }: Props) {
         <AreaHero name={area.name} headerImage={area.headerImage} />
 
         <section className="my-4">
-          <ul className="space-y-2">
-            {rocks.map((rock) => (
-              <RockListCard
-                key={rock.id}
-                areaName={area.name}
-                areaSlug={slug}
-                rock={rock}
-                routes={routesByRock.get(String(rock.id)) ?? []}
-              />
-            ))}
-          </ul>
+          <AreaRockList
+            areaName={area.name}
+            areaSlug={slug}
+            rows={rocks.map((rock) => ({
+              rock,
+              routes: routesByRock.get(String(rock.id)) ?? [],
+            }))}
+          />
         </section>
       </div>
     </div>

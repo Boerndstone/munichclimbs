@@ -120,7 +120,7 @@ export function RockListCard({ areaName, areaSlug, rock, routes }: Props) {
           <div className="flex min-w-0 items-center justify-between gap-3">
             <h3 className="truncate text-base font-normal leading-tight">{rock.name}</h3>
             {(height !== null || orientation) && (
-              <span className="shrink-0 text-sm text-muted-foreground">
+              <span className="shrink-0 text-sm text-black">
                 {height !== null && `${height} m`}
                 {height !== null && orientation && <span className="mx-1.5 text-border">|</span>}
                 {orientation}
@@ -132,7 +132,7 @@ export function RockListCard({ areaName, areaSlug, rock, routes }: Props) {
             <div className="mt-3 flex min-w-0 gap-2" aria-label={`${routes.length} Routen nach Schwierigkeitsgrad`}>
               <span className="w-6 shrink-0 self-end text-sm leading-none tabular-nums">{routes.length}</span>
               <div className="min-w-0 flex-1">
-                <div className="mb-1 flex text-center text-[11px] leading-none tabular-nums text-muted-foreground">
+                <div className="mb-1 flex text-center text-[11px] leading-none tabular-nums text-black">
                   {segments.map(({ bucket, count }) => (
                     <span key={String(bucket)} className="min-w-0 flex-1">{count}</span>
                   ))}
