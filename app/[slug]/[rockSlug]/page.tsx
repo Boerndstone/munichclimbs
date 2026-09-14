@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Home, Info, MapPin, Ruler } from "lucide-react"
+import { Home } from "lucide-react"
 import { notFound } from "next/navigation"
 
 import {
@@ -10,7 +10,7 @@ import {
   fetchToposForRock,
 } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RockInfoSheet } from "@/components/rock-info-sheet"
 import { RockTopoSections } from "@/components/rock-topo-sections"
 import type { Rock } from "@/types/rock"
 import type { Metadata } from "next"
@@ -108,43 +108,20 @@ export default async function RockPage({ params }: Props) {
                   <span className="truncate text-black">{rock.name}</span>
                 </nav>
               </div>
-              <Badge variant="secondary" className="shrink-0 bg-white/90 text-black">
-                {routes.length} {routes.length === 1 ? "Route" : "Routen"}
-              </Badge>
+              <div className="flex shrink-0 items-center gap-2">
+                <Badge variant="secondary" className="bg-white/90 text-black">
+                  {routes.length} {routes.length === 1 ? "Route" : "Routen"}
+                </Badge>
+                <RockInfoSheet rock={rock} areaName={area.name} routeCount={routes.length} />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       <div className="mx-auto w-full max-w-[1024px] px-2 py-4 sm:px-4">
-        <div className="grid gap-4 md:grid-cols-4">
-          <div className="min-w-0 md:col-span-3">
-            <RockTopoSections topos={topos} routes={routes} />
-          </div>
-
-          <aside className="md:col-span-1">
-            <Card className="gap-0 py-0 md:sticky md:top-[74px]">
-              <CardHeader className="px-3 py-3">
-                <CardTitle className="flex items-center gap-2 text-base font-medium">
-                  <Info className="size-4" />
-                  Fels-Infos
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 px-3 pb-3 text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="size-4 shrink-0" />
-                  <Link href={`/${slug}`} className="hover:text-foreground hover:underline">{area.name}</Link>
-                </div>
-                {typeof rock.height === "number" && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Ruler className="size-4 shrink-0" />
-                    {rock.height} m Höhe
-                  </div>
-                )}
-                {rock.orientation && <p className="text-muted-foreground">Ausrichtung: {rock.orientation}</p>}
-              </CardContent>
-            </Card>
-          </aside>
+        <div className="min-w-0 md:w-3/4">
+          <RockTopoSections topos={topos} routes={routes} />
         </div>
       </div>
     </main>
