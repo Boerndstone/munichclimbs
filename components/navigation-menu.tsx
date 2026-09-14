@@ -37,7 +37,7 @@ function NavigationArea({ area }: { area: Area }) {
     <Collapsible asChild open={isOpen} onOpenChange={setIsOpen}>
       <li>
         <CollapsibleTrigger asChild>
-          <Button variant="ghost" className="h-auto w-full justify-start gap-2 px-2 py-2 text-left text-sm font-normal text-foreground">
+          <Button variant="ghost" className="h-auto w-full justify-start gap-2 px-2 py-2 text-left text-sm font-normal text-foreground hover:cursor-pointer" >
           {area.image ? (
             <img
               src={`https://www.munichclimbs.de/build/images/navigationThumbs/${area.image}.webp`}
@@ -108,7 +108,7 @@ export function NavigationMenu({ areas }: { areas: Area[] }) {
         <div className="flex shrink-0 items-center gap-2 md:w-1/4">
           <Sheet>
             <SheetTrigger asChild>
-              <button className="inline-flex size-9 items-center justify-center rounded-md hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Navigation öffnen">
+              <button className="inline-flex size-9 items-center justify-center rounded-md hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring hover:cursor-pointer" aria-label="Navigation öffnen">
                 <Menu className="size-5" />
               </button>
             </SheetTrigger>

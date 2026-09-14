@@ -182,9 +182,9 @@ export function SearchModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex flex-1 justify-start text-muted-foreground">
+        <Button variant="outline" className="flex flex-1 justify-start text-muted-foreground hover:cursor-pointer">
           <Search className="size-4" />
-          Suche
+          Suche nach Felsen/Routen
         </Button>
       </DialogTrigger>
       <DialogContent>
