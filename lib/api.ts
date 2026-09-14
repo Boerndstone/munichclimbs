@@ -143,6 +143,15 @@ export interface BannedRockSummary {
   area?: string | ApiReference
 }
 
+export interface RockTranslationSummary {
+  id: number
+  locale: string
+  description?: string | null
+  access?: string | null
+  nature?: string | null
+  flowers?: string | null
+}
+
 interface HydraCollection<T> {
   "hydra:member"?: T[]
   "hydra:view"?: { "hydra:next"?: string }
@@ -194,6 +203,22 @@ export async function fetchToposForRock(rockId: string | number): Promise<TopoSu
   } catch (error) {
     console.error("Error fetching rock topos:", error)
     return []
+  }
+}
+
+/** Returns one rock's localized long-form content from the public API. */
+export async function fetchRockTranslation(
+  rockId: string | number,
+  locale = "de"
+): Promise<RockTranslationSummary | null> {
+  try {
+    const translations = await fetchHydraCollection<RockTranslationSummary>(
+      `${API_BASE_URL}/rock_translations?rock.id=${encodeURIComponent(String(rockId))}&locale=${encodeURIComponent(locale)}`
+    )
+    return translations[0] ?? null
+  } catch (error) {
+    console.error("Error fetching rock translation:", error)
+    return null
   }
 }
 

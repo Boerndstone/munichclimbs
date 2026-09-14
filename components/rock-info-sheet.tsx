@@ -32,7 +32,14 @@ type Props = {
 function textFrom(rock: Rock, keys: string[]) {
   for (const key of keys) {
     const value = rock[key]
-    if (typeof value === "string" && value.trim()) return value.trim()
+    if (typeof value === "string" && value.trim()) {
+      return value
+        .replace(/<\/p>\s*<p>/gi, "\n\n")
+        .replace(/<br\s*\/?\s*>/gi, "\n")
+        .replace(/<[^>]*>/g, "")
+        .replace(/&nbsp;/gi, " ")
+        .trim()
+    }
   }
   return null
 }
@@ -75,14 +82,13 @@ export function RockInfoSheet({ rock, areaName, routeCount }: Props) {
       <SheetTrigger asChild>
         <Button variant="secondary" size="sm" className="shrink-0 bg-white/90 text-black hover:bg-white">
           <CircleHelp className="size-4" aria-hidden="true" />
-          <span className="hidden sm:inline">Fels-Infos</span>
+          <span className="hidden sm:inline">Fels</span>
           <span className="sr-only sm:hidden">Fels-Infos öffnen</span>
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-full gap-0 overflow-y-auto p-0 sm:max-w-md">
         <SheetHeader className="border-b pr-12">
           <SheetTitle>{rock.name}</SheetTitle>
-          <SheetDescription>Informationen zum Fels im Klettergebiet {areaName}.</SheetDescription>
         </SheetHeader>
 
         <div className="px-4 pb-6">

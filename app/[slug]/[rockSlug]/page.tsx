@@ -6,6 +6,7 @@ import { notFound } from "next/navigation"
 import {
   fetchAreaBySlug,
   fetchRocksForArea,
+  fetchRockTranslation,
   fetchRoutesForArea,
   fetchToposForRock,
 } from "@/lib/api"
@@ -69,7 +70,11 @@ export default async function RockPage({ params }: Props) {
   const routes = areaRoutes
     .filter((route) => routeRockId(route) === String(rock.id))
     .sort((left, right) => (left.name ?? "").localeCompare(right.name ?? "", "de"))
-  const topos = await fetchToposForRock(rock.id)
+  const [topos, translation] = await Promise.all([
+    fetchToposForRock(rock.id),
+    fetchRockTranslation(rock.id),
+  ])
+  const rockWithTranslation = { ...rock, ...translation }
   const heroImage = rockHeroImage(rock.image)
 
   return (
@@ -109,10 +114,7 @@ export default async function RockPage({ params }: Props) {
                 </nav>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <Badge variant="secondary" className="bg-white/90 text-black">
-                  {routes.length} {routes.length === 1 ? "Route" : "Routen"}
-                </Badge>
-                <RockInfoSheet rock={rock} areaName={area.name} routeCount={routes.length} />
+                <RockInfoSheet rock={rockWithTranslation} areaName={area.name} routeCount={routes.length} />
               </div>
             </div>
           </div>
