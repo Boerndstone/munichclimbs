@@ -38,7 +38,9 @@ export default async function AreaPage({ params }: Props) {
   ])
   const routesByRock = new Map<string, typeof routes>()
   for (const route of routes) {
-    const rockId = route.rock?.id?.toString() ?? extractRockId(route.rock?.["@id"] ?? "")
+    const rockId = typeof route.rock === "string"
+      ? extractRockId(route.rock)
+      : route.rock?.id?.toString() ?? extractRockId(route.rock?.["@id"] ?? "")
     if (!rockId) continue
     const rockRoutes = routesByRock.get(rockId) ?? []
     rockRoutes.push(route)

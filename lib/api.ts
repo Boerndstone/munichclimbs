@@ -98,16 +98,28 @@ export interface AreaWithRocks extends Area {
 
 export interface RouteSummary {
   id: number
+  name?: string
+  nr?: number | null
   grade?: string | null
   gradeNo?: number | null
   scale?: string | null
-  rock?: { "@id"?: string; id?: number }
+  firstAscent?: string | null
+  yearFirstAscent?: number | null
+  rating?: number | null
+  protection?: number | null
+  rockQuality?: boolean | null
+  climbingStyle?: string[] | null
+  topoId?: number | null
+  rock?: { "@id"?: string; id?: number; name?: string } | string
 }
 
 export interface TopoSummary {
   id: number
   name: string
   image?: string | null
+  number?: number | null
+  pathCollection?: string | null
+  withSector?: boolean | null
   updatedAt?: string | null
   rocks?: string | { "@id"?: string; id?: number; name?: string; slug?: string }
 }
@@ -170,6 +182,18 @@ export async function fetchLatestTopo(): Promise<TopoSummary | null> {
   } catch (error) {
     console.error("Error fetching latest topo:", error)
     return null
+  }
+}
+
+/** Fetches every public topo belonging to one rock, ordered by its route topo number. */
+export async function fetchToposForRock(rockId: string | number): Promise<TopoSummary[]> {
+  try {
+    return await fetchHydraCollection<TopoSummary>(
+      `${API_BASE_URL}/topos?rocks.id=${encodeURIComponent(String(rockId))}&order[number]=asc`
+    )
+  } catch (error) {
+    console.error("Error fetching rock topos:", error)
+    return []
   }
 }
 

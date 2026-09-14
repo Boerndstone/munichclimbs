@@ -5,6 +5,11 @@ export interface Rock {
   url?: string
   image?: string
   previewImage?: string
+  childFriendly?: boolean | null
+  sunny?: boolean | null
+  rain?: boolean | null
+  train?: boolean | null
+  bike?: boolean | null
   height?: number | null
   orientation?: string | null
   online?: boolean | number
