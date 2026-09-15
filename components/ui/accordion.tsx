@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 const Accordion = AccordionPrimitive.Root
 
 function AccordionItem({ className, ...props }: React.ComponentProps<typeof AccordionPrimitive.Item>) {
-  return <AccordionPrimitive.Item className={cn("border-b last:border-b-0", className)} {...props} />
+  return <AccordionPrimitive.Item className={cn("border-b border-black last:border-b-0", className)} {...props} />
 }
 
 function AccordionTrigger({
@@ -36,10 +36,13 @@ function AccordionTrigger({
 function AccordionContent({ className, children, ...props }: React.ComponentProps<typeof AccordionPrimitive.Content>) {
   return (
     <AccordionPrimitive.Content
-      className="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+      className={cn(
+        "overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
+        className
+      )}
       {...props}
     >
-      <div className={cn("pb-4", className)}>{children}</div>
+      {children}
     </AccordionPrimitive.Content>
   )
 }

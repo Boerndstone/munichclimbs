@@ -114,7 +114,7 @@ export default async function RockPage({ params }: Props) {
                 </nav>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <RockInfoSheet rock={rockWithTranslation} areaName={area.name} routeCount={routes.length} />
+                <RockInfoSheet rock={rockWithTranslation} areaName={area.name} railwayStation={area.railwayStation} routeCount={routes.length} routes={routes} />
               </div>
             </div>
           </div>

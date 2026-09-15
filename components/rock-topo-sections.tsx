@@ -15,29 +15,23 @@ function RouteTable({ routes }: { routes: RouteSummary[] }) {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
-        <thead className="border-b bg-muted/40 text-xs font-medium uppercase text-muted-foreground">
-          <tr>
-            <th className="w-10 px-3 py-2">Nr.</th>
-            <th className="px-3 py-2">Route</th>
-            <th className="px-3 py-2">Grad</th>
-            <th className="hidden px-3 py-2 lg:table-cell">Erstbegeher</th>
-          </tr>
-        </thead>
+    <div className="relative w-full overflow-x-auto">
+      <table className="w-full caption-bottom border-collapse border-b border-[var(--theme-border)] text-sm font-medium leading-tight text-[var(--theme-text)]">
         <tbody className="divide-y">
           {routes.map((route, index) => (
-            <tr key={route.id} className="transition-colors hover:bg-muted/40">
-              <td className="px-3 py-2 tabular-nums text-muted-foreground">{route.nr ?? index + 1}</td>
-              <td className="px-3 py-2 font-medium">
-                {route.name ?? "Unbenannte Route"}
-                {route.climbingStyle?.includes("multi-pitch") && (
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">Mehrseillänge</span>
-                )}
+            <tr key={route.id} className="border-b border-[var(--theme-border)] transition-colors hover:bg-[var(--theme-bg)]/50">
+              <td className="px-2 py-1 align-middle lg:px-2.5">{index + 1}</td>
+              <td className="px-2 py-1 align-middle lg:min-w-0 lg:whitespace-nowrap lg:px-2.5">
+                <div className="flex min-w-0 flex-wrap items-center gap-x-1 lg:flex-nowrap lg:gap-y-0">
+                  <span className="min-w-0 max-w-full shrink font-medium lg:truncate" title="{{ route.name }}">{route.name}</span>
+                  {route.climbingStyle?.includes("multi-pitch") && (
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">Mehrseillänge</span>
+                  )}
+                </div>
               </td>
               <td className="px-3 py-2 whitespace-nowrap">{route.grade ?? "–"}</td>
-              <td className="hidden px-3 py-2 text-muted-foreground lg:table-cell">
-                {route.firstAscent || "–"}
+              <td className="hidden px-3 py-2 lg:table-cell">
+                {route.firstAscent}
                 {route.yearFirstAscent ? ` (${route.yearFirstAscent})` : ""}
               </td>
             </tr>

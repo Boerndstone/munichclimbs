@@ -2,9 +2,9 @@
 
 import Link from "next/link"
 import {
+  Info,
   AlertTriangle,
   Bike,
-  CircleHelp,
   FileText,
   HandHeart,
   Images,
@@ -18,16 +18,21 @@ import {
 } from "lucide-react"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { RouteGradeHistogram } from "@/components/route-grade-histogram"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import type { RouteSummary } from "@/lib/api"
 import type { Rock } from "@/types/rock"
 
 type Props = {
   rock: Rock
   areaName: string
+  railwayStation?: unknown
   routeCount: number
+  routes: RouteSummary[]
 }
+
+type RailwayAccess = { stationName: string; minutes: number; mode: "walk" | "bike" }
 
 function textFrom(rock: Rock, keys: string[]) {
   for (const key of keys) {
@@ -50,20 +55,60 @@ function coordinate(value: unknown) {
   return null
 }
 
-function SectionTitle({ icon: Icon, children }: { icon: typeof CircleHelp; children: React.ReactNode }) {
+function stations(value: unknown): Array<Record<string, unknown>> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return []
+  const record = value as Record<string, unknown>
+  if ("lat" in record || "lng" in record) return [record]
+  if (Array.isArray(record.trainStations)) return record.trainStations.filter((station): station is Record<string, unknown> => Boolean(station) && typeof station === "object" && !Array.isArray(station))
+  return Object.values(record).filter((station): station is Record<string, unknown> => Boolean(station) && typeof station === "object" && !Array.isArray(station))
+}
+
+function railwayAccesses(rock: Rock, railwayStation: unknown): RailwayAccess[] {
+  if (!rock.train && !rock.bike) return []
+  const latitude = coordinate(rock.lat)
+  const longitude = coordinate(rock.lng)
+  if (latitude === null || longitude === null) return []
+
+  let nearest: Record<string, unknown> | null = null
+  let nearestDistance: number | null = null
+  for (const station of stations(railwayStation)) {
+    const stationLat = coordinate(station.lat)
+    const stationLng = coordinate(station.lng)
+    if (stationLat === null || stationLng === null) continue
+    const latDelta = ((latitude - stationLat) * Math.PI) / 180
+    const lngDelta = ((longitude - stationLng) * Math.PI) / 180
+    const a = Math.sin(latDelta / 2) ** 2 + Math.cos((stationLat * Math.PI) / 180) * Math.cos((latitude * Math.PI) / 180) * Math.sin(lngDelta / 2) ** 2
+    const distance = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    if (nearestDistance === null || distance < nearestDistance) {
+      nearest = station
+      nearestDistance = distance
+    }
+  }
+  if (!nearest || nearestDistance === null) return []
+
+  const stationName = typeof nearest.name === "string" && nearest.name.trim() ? nearest.name.trim() : "Bahnhof"
+  const estimate = (speedKmh: number) => Math.max(5, Math.ceil(((nearestDistance * 1.3) / speedKmh) * 60 / 5) * 5)
+  return [
+    ...(rock.train ? [{ stationName, minutes: estimate(4.5), mode: "walk" as const }] : []),
+    ...(rock.bike ? [{ stationName, minutes: estimate(13), mode: "bike" as const }] : []),
+  ]
+}
+
+function SectionTitle({ icon: Icon, children }: { icon: typeof Info; children: React.ReactNode }) {
   return (
-    <span className="flex items-center gap-2">
-      <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
+    <span className="flex items-center gap-2 text-black">
+      <Icon className="size-4 " aria-hidden="true" />
       {children}
     </span>
   )
 }
 
 function BooleanValue({ value, label }: { value: boolean | null | undefined; label: string }) {
-  return <span>{label}: {value ? "Ja" : "Nein"}</span>
+  if (value === null || value === undefined) return "–"
+  return value ? label : "Nein"
 }
 
-export function RockInfoSheet({ rock, areaName, routeCount }: Props) {
+export function RockInfoSheet({ rock, areaName, railwayStation, routeCount, routes }: Props) {
   const description = textFrom(rock, ["description", "rockDescription"])
   const access = textFrom(rock, ["access", "rockAccess"])
   const nature = textFrom(rock, ["nature", "rockNature"])
@@ -76,101 +121,118 @@ export function RockInfoSheet({ rock, areaName, routeCount }: Props) {
     : null
   const mapUrl = hasMap ? `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}` : null
   const googleMapUrl = hasMap ? `https://www.google.com/maps/search/?api=1&query=${latitude}%2C${longitude}` : null
+  const accessEstimates = railwayAccesses(rock, railwayStation)
 
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="secondary" size="sm" className="shrink-0 bg-white/90 text-black hover:bg-white">
-          <CircleHelp className="size-4" aria-hidden="true" />
+          <Info className="size-4" aria-hidden="true" />
           <span className="hidden sm:inline">Fels</span>
           <span className="sr-only sm:hidden">Fels-Infos öffnen</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full gap-0 overflow-y-auto p-0 sm:max-w-md">
-        <SheetHeader className="border-b pr-12">
-          <SheetTitle>{rock.name}</SheetTitle>
+      <SheetContent side="right" className="w-full gap-0 overflow-y-auto border-l border-black bg-white p-0 text-black sm:max-w-[24rem]">
+        <SheetHeader className="shrink-0 border-b border-black px-3 py-2 pr-12 text-black">
+          <SheetTitle className="text-black">{rock.name}</SheetTitle>
         </SheetHeader>
 
-        <div className="px-4 pb-6">
+        <div className="min-h-0 flex-1">
           <Accordion type="multiple" defaultValue={["general"]}>
             <AccordionItem value="general">
-              <AccordionTrigger><SectionTitle icon={CircleHelp}>Allgemein</SectionTitle></AccordionTrigger>
-              <AccordionContent>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-muted-foreground">
-                  <span>Routen</span><strong className="text-foreground">{routeCount}</strong>
-                  {typeof rock.height === "number" && <><span>Höhe</span><strong className="text-foreground">{rock.height} m</strong></>}
-                  {rock.orientation && <><span>Ausrichtung</span><strong className="text-foreground">{rock.orientation}</strong></>}
-                  {rock.season && <><span>Saison</span><strong className="text-foreground">{rock.season}</strong></>}
-                  {rock.zone !== null && rock.zone !== undefined && <><span>Zone</span><strong className="text-foreground">{rock.zone}</strong></>}
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Info}>Allgemein</SectionTitle></AccordionTrigger>
+              <AccordionContent className="border-t border-black text-black">
+                <div className="border-b border-black px-3 py-3">
+                  <RouteGradeHistogram routes={routes} />
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {rock.sunny !== null && rock.sunny !== undefined && <Badge variant="outline"><BooleanValue value={rock.sunny} label="Sonnig" /></Badge>}
-                  {rock.childFriendly !== null && rock.childFriendly !== undefined && <Badge variant="outline"><BooleanValue value={rock.childFriendly} label="Kinderfreundlich" /></Badge>}
-                  {rock.rain !== null && rock.rain !== undefined && <Badge variant="outline"><BooleanValue value={rock.rain} label="Regenschutz" /></Badge>}
-                  {rock.train && <Badge variant="outline"><Train className="mr-1 size-3" />Bahn</Badge>}
-                  {rock.bike && <Badge variant="outline"><Bike className="mr-1 size-3" />Rad</Badge>}
-                </div>
+                <table className="w-full border-collapse text-sm font-medium text-[var(--theme-text)] [&>tbody>tr:last-child]:border-b-0">
+                  <tbody>
+                    {typeof rock.height === "number" && <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">Höhe:</td><td className="px-3 py-2">{rock.height} m</td></tr>}
+                    {rock.orientation && <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">Ausrichtung:</td><td className="px-3 py-2">{rock.orientation}</td></tr>}
+                    <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">Sonnig:</td><td className="px-3 py-2"><BooleanValue value={rock.sunny} label="Sonnig" /></td></tr>
+                    <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">Kinderfreundlich:</td><td className="px-3 py-2"><BooleanValue value={rock.childFriendly} label="Ja" /></td></tr>
+                    <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">Regenschutz:</td><td className="px-3 py-2"><BooleanValue value={rock.rain} label="Ja" /></td></tr>
+                    {hasMap && <>
+                      <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">GPS:</td><td className="px-3 py-2">{latitude}, {longitude}</td></tr>
+                      <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2 align-top">Auf Karte zeigen:</td><td className="px-3 py-2"><Link href={googleMapUrl!} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-2 hover:text-black/70">↗ Google Maps</Link><br /><Link href={mapUrl!} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-2 hover:text-black/70">↗ OpenStreetMap</Link></td></tr>
+                    </>}
+                    {rock.season && <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">Saison:</td><td className="px-3 py-2">{rock.season}</td></tr>}
+                    {rock.zone !== null && rock.zone !== undefined && <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">Zone:</td><td className="px-3 py-2">{rock.zone}</td></tr>}
+                  </tbody>
+                </table>
               </AccordionContent>
             </AccordionItem>
 
             {description && <AccordionItem value="description">
-              <AccordionTrigger><SectionTitle icon={FileText}>Beschreibung</SectionTitle></AccordionTrigger>
-              <AccordionContent><p className="whitespace-pre-line leading-6 text-muted-foreground">{description}</p></AccordionContent>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={FileText}>Beschreibung</SectionTitle></AccordionTrigger>
+              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p className="whitespace-pre-line leading-relaxed">{description}</p></AccordionContent>
             </AccordionItem>}
 
-            {access && <AccordionItem value="access">
-              <AccordionTrigger><SectionTitle icon={Route}>Anfahrt &amp; Zustieg</SectionTitle></AccordionTrigger>
-              <AccordionContent><p className="whitespace-pre-line leading-6 text-muted-foreground">{access}</p></AccordionContent>
+            {(access || accessEstimates.length > 0) && <AccordionItem value="access">
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Route}>Anfahrt &amp; Zustieg</SectionTitle></AccordionTrigger>
+              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black">
+                {accessEstimates.length > 0 && <div className="mb-3 space-y-2">
+                  {accessEstimates.map((estimate) => (
+                    <div key={estimate.mode} className="border border-black bg-transparent p-2.5">
+                      <div className="font-semibold leading-snug">{estimate.mode === "bike" ? "Mit der Bahn und Fahrrad" : "Vom Bahnhof zu Fuß"}</div>
+                      <div className="text-xs leading-snug opacity-80">ca. {estimate.minutes} Min. ab {estimate.stationName}</div>
+                    </div>
+                  ))}
+                </div>}
+                {access && <p className="whitespace-pre-line leading-relaxed">{access}</p>}
+              </AccordionContent>
             </AccordionItem>}
 
             <AccordionItem value="map">
-              <AccordionTrigger><SectionTitle icon={MapPinned}>Karte</SectionTitle></AccordionTrigger>
-              <AccordionContent>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={MapPinned}>Karte</SectionTitle></AccordionTrigger>
+              <AccordionContent className="border-t border-black text-black">
                 {hasMap && mapBounds && mapUrl && googleMapUrl ? <>
                   <iframe
                     title={`Karte zu ${rock.name}`}
                     src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapBounds}&layer=mapnik&marker=${latitude}%2C${longitude}`}
-                    className="h-56 w-full rounded-md border"
+                    className="h-64 w-full border-0"
                     loading="lazy"
                   />
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 px-3 py-3">
                     <Button asChild variant="outline" size="sm"><Link href={mapUrl} target="_blank" rel="noreferrer">OpenStreetMap</Link></Button>
                     <Button asChild variant="outline" size="sm"><Link href={googleMapUrl} target="_blank" rel="noreferrer">Google Maps</Link></Button>
                   </div>
-                </> : <p className="text-muted-foreground">Für diesen Fels sind noch keine Koordinaten hinterlegt.</p>}
+                </> : <p className="px-5 py-3">Für diesen Fels sind noch keine Koordinaten hinterlegt.</p>}
               </AccordionContent>
             </AccordionItem>
 
             {nature && <AccordionItem value="nature">
-              <AccordionTrigger><SectionTitle icon={ShieldAlert}>Kletterregelung &amp; Naturschutz</SectionTitle></AccordionTrigger>
-              <AccordionContent><p className="whitespace-pre-line leading-6 text-muted-foreground">{nature}</p></AccordionContent>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={ShieldAlert}>Kletterregelung &amp; Naturschutz</SectionTitle></AccordionTrigger>
+              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p className="whitespace-pre-line leading-relaxed">{nature}</p></AccordionContent>
             </AccordionItem>}
 
             {flowers && <AccordionItem value="flowers">
-              <AccordionTrigger><SectionTitle icon={Leaf}>Pflanzen</SectionTitle></AccordionTrigger>
-              <AccordionContent><p className="whitespace-pre-line leading-6 text-muted-foreground">{flowers}</p></AccordionContent>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Leaf}>Pflanzen</SectionTitle></AccordionTrigger>
+              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p className="whitespace-pre-line leading-relaxed">{flowers}</p></AccordionContent>
             </AccordionItem>}
 
             <AccordionItem value="images">
-              <AccordionTrigger><SectionTitle icon={Images}>Bilder</SectionTitle></AccordionTrigger>
-              <AccordionContent><p className="text-muted-foreground">Bilder zu diesem Fels erscheinen hier, sobald sie über die Bild-API verfügbar sind.</p></AccordionContent>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Images}>Bilder</SectionTitle></AccordionTrigger>
+              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p>Bilder zu diesem Fels erscheinen hier, sobald sie über die Bild-API verfügbar sind.</p></AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="symbols">
-              <AccordionTrigger><SectionTitle icon={Mountain}>Zeichenerklärung</SectionTitle></AccordionTrigger>
-              <AccordionContent>
-                <ul className="space-y-2 text-muted-foreground">
-                  <li className="flex items-center gap-2"><Star className="size-4" /> Empfehlenswerte Route</li>
-                  <li className="flex items-center gap-2"><AlertTriangle className="size-4" /> Besondere Vorsicht bei der Absicherung</li>
-                  <li className="flex items-center gap-2"><ShieldAlert className="size-4" /> Sperrung oder wichtige Regelung beachten</li>
-                </ul>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Mountain}>Zeichenerklärung</SectionTitle></AccordionTrigger>
+              <AccordionContent className="border-t border-black text-black">
+                <table className="w-full border-collapse text-sm [&>tbody>tr:last-child]:border-b-0"><tbody>
+                  <tr className="border-b border-black"><td className="px-3 py-2"><Star className="size-4" /></td><td className="px-3 py-2">Empfehlenswerte Route</td></tr>
+                  <tr className="border-b border-black"><td className="px-3 py-2"><span className="flex"><Star className="size-4" /><Star className="size-4" /></span></td><td className="px-3 py-2">Sehr empfehlenswerte Route</td></tr>
+                  <tr className="border-b border-black"><td className="px-3 py-2"><span className="flex"><Star className="size-4" /><Star className="size-4" /><Star className="size-4" /></span></td><td className="px-3 py-2">Traumroute</td></tr>
+                  <tr className="border-b border-black"><td className="px-3 py-2"><AlertTriangle className="size-4" /></td><td className="px-3 py-2">Besondere Vorsicht bei der Absicherung</td></tr>
+                  <tr className="border-b border-black"><td className="px-3 py-2"><ShieldAlert className="size-4" /></td><td className="px-3 py-2">Sperrung oder wichtige Regelung beachten</td></tr>
+                </tbody></table>
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="help">
-              <AccordionTrigger><SectionTitle icon={HandHeart}>Mithelfen</SectionTitle></AccordionTrigger>
-              <AccordionContent>
-                <p className="leading-6 text-muted-foreground">Kennst du neue Routen, Änderungen oder wichtige Hinweise zu diesem Fels? Schreib uns, damit die Informationen aktuell bleiben.</p>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={HandHeart}>Mithelfen</SectionTitle></AccordionTrigger>
+              <AccordionContent className="border-t border-black px-3 pb-4 pt-2 text-black">
+                <p className="leading-relaxed">Kennst du neue Routen, Änderungen oder wichtige Hinweise zu diesem Fels? Schreib uns, damit die Informationen aktuell bleiben.</p>
                 <Button asChild variant="outline" size="sm" className="mt-3"><a href="mailto:admin@munichclimbs.de">Information senden</a></Button>
               </AccordionContent>
             </AccordionItem>
