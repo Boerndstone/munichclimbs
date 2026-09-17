@@ -6,6 +6,8 @@ export interface Area {
   image?: string
   headerImage?: string | null
   orientation?: string | null
+  lat?: string | number | null
+  lng?: string | number | null
   online?: number
   [key: string]: unknown // Allow for additional properties from API
 }

@@ -1,11 +1,13 @@
 import { AreaCard } from "@/components/area-card"
 import { BannedRocksCard, LatestRoutesCard, SupportProjectCard, type SidebarBannedRock, type SidebarRoute } from "@/components/home-sidebar-cards"
 import { LatestTopoCard } from "@/components/latest-topo-card"
+import { AreasMapDialog, type AreaMapSummary, type RockMapSummary } from "@/components/areas-map-dialog"
 import {
   fetchAreas,
   fetchBannedRocks,
   fetchLatestRoutes,
   fetchLatestTopo,
+  fetchRocks,
   fetchRoutesForArea,
   type BannedRockSummary,
   type LatestRouteSummary,
@@ -29,8 +31,10 @@ type TopoLocation = {
 
 type AreaRock = { "@id"?: string; name?: string; slug?: string }
 
-function referenceId(reference: string | { "@id"?: string } | undefined): string | undefined {
-  return typeof reference === "string" ? reference : reference?.["@id"]
+function referenceId(reference: unknown): string | undefined {
+  if (typeof reference === "string") return reference
+  if (reference && typeof reference === "object" && "@id" in reference && typeof reference["@id"] === "string") return reference["@id"]
+  return undefined
 }
 
 function findRockLocation(rockReference: string | { "@id"?: string } | undefined, areas: Area[]): TopoLocation | undefined {
@@ -70,13 +74,43 @@ function bannedRockCards(rocks: BannedRockSummary[], areas: Area[]): SidebarBann
   })
 }
 
+function gradeChartIndex(route: { grade?: string | null; gradeNo?: number | null }) {
+  const grade = route.grade?.trim().toUpperCase()
+  if (!grade || route.gradeNo === null || route.gradeNo === 0) return 9
+  const number = Number(grade.match(/\d+/)?.[0])
+  if (!number) return 9
+  return grade.startsWith("FB") ? Math.min(8, Math.max(2, number + 2)) : Math.min(8, Math.max(0, number - 3))
+}
+
+function mapSummaries(areasWithRoutes: Array<{ area: Area; routes: Awaited<ReturnType<typeof fetchRoutesForArea>> }>, rocks: Awaited<ReturnType<typeof fetchRocks>>): AreaMapSummary[] {
+  return areasWithRoutes.map(({ area, routes }) => {
+    const gradeCounts = Array.from({ length: 10 }, () => 0)
+    routes.forEach((route) => { gradeCounts[gradeChartIndex(route)] += 1 })
+    return { id: area.id, routeCount: routes.length, rockCount: rocks.filter((rock) => referenceId(rock.area) === `/api/v1/areas/${area.id}`).length, gradeCounts }
+  })
+}
+
+function rockMapSummaries(areasWithRoutes: Array<{ area: Area; routes: Awaited<ReturnType<typeof fetchRoutesForArea>> }>, rocks: Awaited<ReturnType<typeof fetchRocks>>): RockMapSummary[] {
+  const summaries = new Map<string, RockMapSummary>(rocks.map((rock) => [String(rock.id), { id: rock.id, routeCount: 0, gradeCounts: Array.from({ length: 10 }, () => 0) }]))
+  for (const { routes } of areasWithRoutes) {
+    for (const route of routes) {
+      const rockId = referenceId(route.rock)?.split("/").filter(Boolean).at(-1)
+      const summary = rockId ? summaries.get(rockId) : undefined
+      if (!summary) continue
+      summary.routeCount += 1
+      summary.gradeCounts[gradeChartIndex(route)] += 1
+    }
+  }
+  return [...summaries.values()]
+}
+
 export default async function Home() {
   const areas = await fetchAreas().catch((error) => {
     console.error("Failed to load areas:", error)
     return []
   })
   const onlineAreas = areas.filter((area) => Number(area.online) === 1)
-  const [areasWithRoutes, latestTopo, latestRoutes, bannedRocks] = await Promise.all([
+  const [areasWithRoutes, latestTopo, latestRoutes, bannedRocks, rocks] = await Promise.all([
     Promise.all(
       onlineAreas.map(async (area) => ({
         area,
@@ -86,23 +120,27 @@ export default async function Home() {
     fetchLatestTopo(),
     fetchLatestRoutes(),
     fetchBannedRocks(),
+    fetchRocks(),
   ])
   const latestTopoLocation = findTopoLocation(latestTopo, onlineAreas)
   const latestRouteCardsData = latestRouteCards(latestRoutes, onlineAreas)
   const bannedRockCardsData = bannedRockCards(bannedRocks, onlineAreas)
+  const areaMapSummaries = mapSummaries(areasWithRoutes, rocks)
+  const individualRockMapSummaries = rockMapSummaries(areasWithRoutes, rocks)
 
   return (
     <section className="home-page flex flex-col gap-6" aria-labelledby="index-page-heading">
-      <div className="mb-3 flex items-center justify-between gap-3 py-3">
+      <div className="flex flex-col items-start gap-3">
         <h1 id="index-page-heading" className="text-2xl font-medium leading-tight sm:text-3xl">
           Klettergebiete um München
         </h1>
+        <AreasMapDialog areas={onlineAreas} rocks={rocks} summaries={areaMapSummaries} rockSummaries={individualRockMapSummaries} />
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
         <section className="min-w-0 lg:col-span-8" aria-label="Klettergebiete">
           <div className="flex flex-col gap-4">
-            {areasWithRoutes.map(({ area, routes }) => (
-              <AreaCard key={area.id} area={area} routes={routes} />
+            {areasWithRoutes.map(({ area, routes }, index) => (
+              <AreaCard key={area.id} area={area} routes={routes} priority={index === 0} />
             ))}
           </div>
         </section>

@@ -8,6 +8,7 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card"
 type Props = {
   area: Area
   routes: RouteSummary[]
+  priority?: boolean
 }
 
 const chartColors = ["#059669", "#16a34a", "#65a30d", "#d97706", "#ea580c", "#c2410c", "#dc2626", "#e11d48", "#4338ca", "#334155"]
@@ -83,7 +84,7 @@ function GradeHistogram({ area, routes }: { area: Area; routes?: RouteSummary[] 
   )
 }
 
-export function AreaCard({ area, routes }: Props) {
+export function AreaCard({ area, routes, priority = false }: Props) {
   const href = `/${getAreaSlug(area)}`
 
   return (
@@ -96,6 +97,7 @@ export function AreaCard({ area, routes }: Props) {
                 src={`https://www.munichclimbs.de/uploads/areas/${area.image}.webp`}
                 alt={`Klettergebiet ${area.name}`}
                 fill
+                loading={priority ? "eager" : "lazy"}
                 sizes="(min-width: 768px) 400px, 100vw"
                 className="object-cover transition-transform duration-300 hover:scale-[1.02]"
               />

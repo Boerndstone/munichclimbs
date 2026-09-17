@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "leaflet/dist/leaflet.css";
+@import "react-leaflet-cluster/dist/assets/MarkerCluster.css";
+@import "react-leaflet-cluster/dist/assets/MarkerCluster.Default.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -162,4 +165,44 @@ main:has(.area-page) > div {
   max-width: none;
   gap: 0;
   padding: 0;
+}
+
+.areas-map .leaflet-control-attribution {
+  font-size: 10px;
+}
+
+.areas-map-marker,
+.areas-map-cluster {
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  background: rgb(59 130 246 / 0.82);
+  box-shadow: 0 0 0 8px rgb(59 130 246 / 0.18), 0 0 20px rgb(59 130 246 / 0.4);
+}
+
+.areas-map-marker span {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: white;
+}
+
+.areas-map-cluster span {
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.areas-map .leaflet-popup-content-wrapper,
+.areas-map .leaflet-popup-tip {
+  border-radius: 0.5rem;
+}
+
+.areas-map .leaflet-popup-content {
+  width: 12.5rem !important;
+  margin: 0;
+}
+
+.leaflet-container a {
+  color: inherit;
 }

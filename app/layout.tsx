@@ -45,7 +45,7 @@ export default function RootLayout({
       >
         <SiteNavigation />
         <main className="mx-auto flex w-full max-w-[1024px] flex-1 flex-col px-4 pb-8 pt-[74px] text-[1.05rem] sm:text-[15px]">
-          <div className="flex w-full flex-1 flex-col gap-6 py-6 lg:py-8">
+          <div className="flex w-full flex-1 flex-col">
             {children}
           </div>
         </main>
