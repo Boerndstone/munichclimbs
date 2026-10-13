@@ -130,7 +130,7 @@ export default async function Home() {
 
   return (
     <section className="home-page flex flex-col gap-6" aria-labelledby="index-page-heading">
-      <div className="flex flex-col items-start gap-3">
+      <div className="mb-3 flex items-center justify-between gap-3 py-3">
         <h1 id="index-page-heading" className="text-2xl font-medium leading-tight sm:text-3xl">
           Klettergebiete um München
         </h1>

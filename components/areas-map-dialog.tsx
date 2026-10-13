@@ -66,7 +66,6 @@ export function AreasMapDialog({ areas, rocks, summaries, rockSummaries }: { are
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full justify-start gap-2 sm:w-auto">
           <MapPinned className="size-4" aria-hidden="true" />
-          Übersichtskarte
         </Button>
       </DialogTrigger>
       <DialogContent className="inset-0 h-dvh w-screen max-h-none max-w-none translate-x-0 translate-y-0 rounded-none border-0">
