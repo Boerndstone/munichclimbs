@@ -144,11 +144,20 @@ export function NavigationMenu({ areas }: { areas: Area[] }) {
             <Settings className="size-[18px]" />
           </button>
           {settingsOpen && (
-            <div className="absolute right-0 top-[calc(100%+6px)] z-50 rounded-lg border border-border bg-background p-1 shadow-lg">
-              <button onClick={toggleTheme} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent">
-                {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-                {dark ? "Helles Design" : "Dunkles Design"}
-              </button>
+            <div className="absolute end-0 top-[calc(100%+6px)] z-[1070] w-max min-w-0 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg)] py-1 text-[var(--theme-text)] shadow-lg ring-1 ring-black/5 dark:ring-white/10">
+              <div className="flex flex-wrap items-center gap-3 px-2 py-2">
+                <div className="inline-flex shrink-0 px-1">
+                  <button onClick={toggleTheme} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent">
+                    {dark ? <Moon className="size-4" /> : <Sun className="size-4" />}
+                  </button>
+                </div>
+                <span className="inline-block h-5 w-px shrink-0 self-center bg-[var(--theme-border)]" aria-hidden="true"></span>
+                <div className="px-1">
+                  <button onClick={toggleTheme} className="focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg text-[var(--theme-text)] hover:cursor-pointer">
+                    {dark ? <Moon className="size-4" /> : <Sun className="size-4" />}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

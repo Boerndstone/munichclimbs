@@ -54,7 +54,7 @@ export function LatestTopoCard({ topo, areaSlug, areaName, rockSlug, rockName }:
         <hr className="border-0 border-t border-dotted border-border" />
         <Link href={href} className="inline-flex items-center text-sm font-semibold text-foreground hover:underline">
           <ChevronRight className="size-4" aria-hidden="true" />
-          Mehr erfahren
+          Zum Topo
         </Link>
       </div>
     </section>

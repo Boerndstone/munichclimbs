@@ -98,16 +98,16 @@ export function RockListCard({ areaName, areaSlug, rock, routes }: Props) {
     <li>
       <Link
         href={href}
-        className="group flex overflow-hidden rounded-lg border border-border bg-card shadow-sm transition hover:border-muted-foreground/30 hover:bg-muted/30 hover:shadow-md"
+        className="rock-item-card mb-2 flex overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md transition-[box-shadow,border-color,background-color] duration-200 ease-out group-hover:border-gray-300 group-hover:bg-neutral-50 group-hover:shadow-lg  dark:border-gray-700 dark:bg-black dark:group-hover:border-gray-600 dark:group-hover:bg-neutral-950/80 "
       >
-        <div className="relative w-[75px] shrink-0 bg-muted">
+        <div className="relative w-[75px] shrink-0 self-stretch bg-gray-200 dark:bg-gray-800">
           {previewImage ? (
             <Image
               src={previewImage}
               alt={`Klettergebiet ${areaName}, Fels ${rock.name}`}
               fill
               sizes="75px"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.04]"
             />
           ) : (
             <div className="flex h-full min-h-[92px] items-center justify-center text-muted-foreground" aria-label="Kein Bild verfügbar">
@@ -116,16 +116,16 @@ export function RockListCard({ areaName, areaSlug, rock, routes }: Props) {
           )}
         </div>
 
-        <div className="min-w-0 flex-1 px-3 py-2">
-          <div className="flex min-w-0 items-center justify-between gap-3">
-            <h3 className="truncate text-base font-normal leading-tight">{rock.name}</h3>
-            {(height !== null || orientation) && (
-              <span className="shrink-0 text-sm text-black">
-                {height !== null && `${height} m`}
-                {height !== null && orientation && <span className="mx-1.5 text-border">|</span>}
-                {orientation}
-              </span>
-            )}
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5 px-3 py-2">
+          <div className="min-w-0 flex items-center justify-between">
+            <h2 className="mb-0 min-w-0 max-w-[150px] truncate text-base font-normal leading-tight lg:max-w-none">{rock.name}</h2>
+            <div className="mt-0.5 flex flex-wrap items-center gap-1 text-sm text-gray-800 dark:text-gray-200">
+              {(height !== null || orientation) && (
+                  <p className="mb-0">{height !== null && `${height} m`}</p>
+                  // {height !== null && orientation && <span className="h-3.5 w-px shrink-0 bg-gray-400 dark:bg-gray-600">|</span>}
+                  // <p className="mb-0">{orientation}</p>
+              )}
+            </div>
           </div>
 
           {segments.length > 0 && (
