@@ -51,6 +51,8 @@ This means the work is a controlled parity migration and refinement—not a blan
 
 ### Phase 0 — Establish the migration contract
 
+**Progress:** Route/API inventory and the desktop/mobile light/dark visual baseline are complete. See `../munich/apps/backoffice/docs/public-frontend-api-inventory.json` and `reference-screenshots.md`.
+
 1. Make a machine-readable route inventory from the Symfony controllers, including every German/English URL, redirect, HTTP status, canonical URL, title, description, and JSON-LD type.
 2. Capture desktop and mobile reference screenshots for the home page, one area page, and one rock page in both themes.
 3. List every public API endpoint and field used by the Symfony templates, then compare it with `lib/api.ts` and the current TypeScript types.
