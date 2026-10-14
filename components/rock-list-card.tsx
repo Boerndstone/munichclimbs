@@ -98,7 +98,7 @@ export function RockListCard({ areaName, areaSlug, rock, routes }: Props) {
     <li>
       <Link
         href={href}
-        className="rock-item-card mb-2 flex overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md transition-[box-shadow,border-color,background-color] duration-200 ease-out group-hover:border-gray-300 group-hover:bg-neutral-50 group-hover:shadow-lg  dark:border-gray-700 dark:bg-black dark:group-hover:border-gray-600 dark:group-hover:bg-neutral-950/80 "
+        className="rock-item-card mb-2 flex overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md transition-[box-shadow,border-color,background-color] duration-200 ease-out group-hover:border-gray-300 group-hover:bg-neutral-50 group-hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-black dark:group-hover:border-gray-600 dark:group-hover:bg-neutral-950/80"
       >
         <div className="relative w-[75px] shrink-0 self-stretch bg-gray-200 dark:bg-gray-800">
           {previewImage ? (

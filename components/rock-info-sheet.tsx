@@ -19,7 +19,7 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { RouteGradeHistogram } from "@/components/route-grade-histogram"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import type { RouteSummary } from "@/lib/api"
 import type { PhotoSummary, VideoSummary } from "@/lib/api"
 import type { Rock } from "@/types/rock"
@@ -136,6 +136,7 @@ export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: 
       <SheetContent side="right" className="w-full gap-0 overflow-y-auto border-l border-black bg-white p-0 text-black sm:max-w-[24rem]">
         <SheetHeader className="shrink-0 border-b border-black px-3 py-2 pr-12 text-black">
           <SheetTitle className="text-black">{rock.name}</SheetTitle>
+          <SheetDescription className="sr-only">Informationen, Anfahrt, Karte, Bilder und Hinweise für den Fels {rock.name}.</SheetDescription>
         </SheetHeader>
 
         <div className="min-h-0 flex-1">

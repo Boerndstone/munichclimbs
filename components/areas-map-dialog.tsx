@@ -5,7 +5,7 @@ import { useState } from "react"
 import { MapPinned } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogCloseButton, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogCloseButton, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { getAreaSlug } from "@/lib/slugify"
 import type { Area } from "@/types/area"
 import type { Rock } from "@/types/rock"
@@ -64,18 +64,29 @@ export function AreasMapDialog({ areas, rocks, summaries, rockSummaries }: { are
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full justify-start gap-2 sm:w-auto">
+        <Button variant="outline" size="icon" className="size-8">
           <MapPinned className="size-4" aria-hidden="true" />
+          <span className="sr-only">Karte der Klettergebiete öffnen</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="inset-0 h-dvh w-screen max-h-none max-w-none translate-x-0 translate-y-0 rounded-none border-0">
         <div className="flex items-start justify-between gap-4 border-b px-4 py-3 pr-12">
           <div>
             <DialogTitle>Karte der Klettergebiete</DialogTitle>
+            <DialogDescription>Wählen Sie einen Fels auf der Karte oder nutzen Sie die nachfolgende Liste mit direkten Links.</DialogDescription>
           </div>
           <DialogCloseButton />
         </div>
-        {open && <AreasClusterMap key="areas-map" points={points} />}
+        {open && <div aria-hidden="true"><AreasClusterMap key="areas-map" points={points} /></div>}
+        <nav className="sr-only" aria-label="Felsen auf der Karte">
+          <ul>
+            {points.map((point) => (
+              <li key={point.id}>
+                <a href={point.href}>{point.name} in {point.areaName}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </DialogContent>
     </Dialog>
   )

@@ -10,6 +10,7 @@ import {
   Dialog,
   DialogCloseButton,
   DialogContent,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
@@ -213,7 +214,10 @@ export function SearchModal({
       </DialogTrigger>
       <DialogContent>
         <header className="flex shrink-0 items-center justify-between border-b px-4 py-2">
-          <DialogTitle>Suche</DialogTitle>
+          <div>
+            <DialogTitle>Suche</DialogTitle>
+            <DialogDescription className="sr-only">Durchsuchen Sie Felsen und Routen nach Name, Erstbegeher, Grad oder Eigenschaften.</DialogDescription>
+          </div>
           <DialogCloseButton />
         </header>
 
@@ -234,15 +238,21 @@ export function SearchModal({
           </div>
 
           {(mode === "name" || mode === "firstascent") && (
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={
-                mode === "name"
-                  ? "Suche nach Felsen oder Routen..."
-                  : "Suche nach Erstbegeher..."
-              }
-            />
+            <div>
+              <label className="sr-only" htmlFor="search-query">
+                {mode === "name" ? "Suche nach Felsen oder Routen" : "Suche nach Erstbegeher"}
+              </label>
+              <Input
+                id="search-query"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder={
+                  mode === "name"
+                    ? "Suche nach Felsen oder Routen..."
+                    : "Suche nach Erstbegeher..."
+                }
+              />
+            </div>
           )}
 
           {(mode === "grade" || mode === "attributes") && (
@@ -264,7 +274,7 @@ export function SearchModal({
 
               {mode === "grade" ? (
                 <>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-1" role="group" aria-label="Schwierigkeitsgrade auswählen">
                     {Array.from({ length: 11 }, (_, index) => index + 1).map((grade) => (
                       <Button
                         key={grade}
@@ -272,6 +282,7 @@ export function SearchModal({
                         size="xs"
                         variant={grades.includes(grade) ? "default" : "outline"}
                         className="w-7 px-0"
+                        aria-pressed={grades.includes(grade)}
                         onClick={() => toggleGrade(grade)}
                       >
                         {grade}
@@ -284,13 +295,14 @@ export function SearchModal({
                 </>
               ) : (
                 <>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-1" role="group" aria-label="Eigenschaften auswählen">
                     {attributeFilters.map(([value, label]) => (
                       <Button
                         key={value}
                         type="button"
                         size="xs"
                         variant={attributes.includes(value) ? "default" : "outline"}
+                        aria-pressed={attributes.includes(value)}
                         onClick={() => toggleAttribute(value)}
                       >
                         {label}

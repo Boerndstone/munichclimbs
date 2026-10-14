@@ -107,7 +107,11 @@ export function AreaRockList({
                   checked={active}
                   onCheckedChange={() => toggleFilter(id)}
                   aria-label={label}
+                  aria-describedby={`area-filter-${id}-description`}
                 />
+                <span id={`area-filter-${id}-description`} className="sr-only">
+                  {active ? `${label}: aktiv` : `${label}: inaktiv`}
+                </span>
               </div>
             )
           })}
