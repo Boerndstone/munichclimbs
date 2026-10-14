@@ -18,6 +18,7 @@ import { RockTopoSections } from "@/components/rock-topo-sections"
 import type { Rock } from "@/types/rock"
 import type { Metadata } from "next"
 import { headerImageUrl } from "@/lib/media"
+import { localizedAlternates } from "@/lib/seo"
 
 type Props = { params: Promise<{ slug: string; rockSlug: string }> }
 
@@ -57,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: { absolute: `Munichclimbs | Klettergebiet ${area.name} | Fels ${rock.name}` },
     description: `Felsen ${rock.name} im Klettergebiet ${area.name} – Routen, Grad und Erstbegeher.`,
-    alternates: { canonical: `/${slug}/${rockSlug}` },
+    alternates: localizedAlternates(`/${slug}/${rockSlug}`),
     openGraph: {
       title: `${rock.name} im Klettergebiet ${area.name} | Munichclimbs`,
       description: `Felsen ${rock.name} im Klettergebiet ${area.name} – Routen, Grad und Erstbegeher.`,
@@ -66,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function RockPage({ params }: Props) {
+export async function RockPageContent({ params, locale = "de" }: Props & { locale?: "de" | "en" }) {
   const { slug, rockSlug } = await params
   const area = await fetchAreaBySlug(slug)
   if (!area) notFound()
@@ -89,11 +90,11 @@ export default async function RockPage({ params }: Props) {
       const numberOrder = (left.nr ?? Number.MAX_SAFE_INTEGER) - (right.nr ?? Number.MAX_SAFE_INTEGER)
       if (numberOrder !== 0) return numberOrder
 
-      return (left.name ?? "").localeCompare(right.name ?? "", "de")
+      return (left.name ?? "").localeCompare(right.name ?? "", locale)
     })
   const [topos, translation, comments, photos, videos] = await Promise.all([
     fetchToposForRock(rock.id),
-    fetchRockTranslation(rock.id),
+    fetchRockTranslation(rock.id, locale),
     fetchCommentsForRock(rock.id),
     fetchPhotosForRock(rock.id),
     fetchVideosForRock(rock.id),
@@ -153,3 +154,5 @@ export default async function RockPage({ params }: Props) {
     </div>
   )
 }
+
+export default RockPageContent

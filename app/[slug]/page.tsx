@@ -3,6 +3,7 @@ import { fetchAreaBySlug, fetchRocksForArea, fetchRoutesForArea } from "@/lib/ap
 import { AreaRockList } from "@/components/area-rock-list"
 import { AreaHero } from "@/components/area-hero"
 import type { Metadata } from "next"
+import { localizedAlternates } from "@/lib/seo"
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: { absolute: `Munichclimbs | Klettergebiet ${area.name}` },
     description: `Klettergebiet ${area.name} – Felsen und Routen`,
-    alternates: { canonical: `/${slug}` },
+    alternates: localizedAlternates(`/${slug}`),
     openGraph: {
       title: `Klettergebiet ${area.name} | Munichclimbs`,
       description: `Klettergebiet ${area.name} – Felsen und Routen`,

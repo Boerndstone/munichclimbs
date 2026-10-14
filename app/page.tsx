@@ -16,11 +16,12 @@ import {
 import { getAreaSlug } from "@/lib/slugify"
 import type { Area } from "@/types/area"
 import type { Metadata } from "next"
+import { localizedAlternates } from "@/lib/seo"
 
 export const metadata: Metadata = {
   title: { absolute: "Munichclimbs" },
   description: "Klettern rund um München. Klettergebiete, Felsen und Touren im Überblick.",
-  alternates: { canonical: "/" },
+  alternates: localizedAlternates("/"),
   openGraph: {
     title: "Munichclimbs",
     description: "Klettern rund um München. Klettergebiete, Felsen und Touren im Überblick.",

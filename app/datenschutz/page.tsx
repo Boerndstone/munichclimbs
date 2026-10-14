@@ -4,6 +4,11 @@ export const metadata: Metadata = {
   title: "Datenschutz",
   description: "Datenschutzerklärung von munichclimbs",
   alternates: { canonical: "/datenschutz" },
+  openGraph: {
+    title: "Datenschutz | Munichclimbs",
+    description: "Datenschutzerklärung von munichclimbs",
+    url: "/datenschutz",
+  },
 }
 
 export default function DatenschutzPage() {

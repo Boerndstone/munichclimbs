@@ -4,6 +4,11 @@ export const metadata: Metadata = {
   title: "Impressum",
   description: "Impressum von munichclimbs",
   alternates: { canonical: "/impressum" },
+  openGraph: {
+    title: "Impressum | Munichclimbs",
+    description: "Impressum von munichclimbs",
+    url: "/impressum",
+  },
 }
 
 export default function ImpressumPage() {
