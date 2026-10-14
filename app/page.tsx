@@ -26,6 +26,8 @@ export const metadata: Metadata = {
     title: "Munichclimbs",
     description: "Klettern rund um München. Klettergebiete, Felsen und Touren im Überblick.",
     url: "/",
+    locale: "de_DE",
+    alternateLocale: "en_US",
   },
 }
 
@@ -117,7 +119,7 @@ function publishedRockCount(area: Area, rocks: Awaited<ReturnType<typeof fetchRo
   return rocks.filter((rock) => referenceId(rock.area) === `/api/v1/areas/${area.id}`).length
 }
 
-export default async function Home() {
+export default async function Home({ locale = "de" }: { locale?: "de" | "en" }) {
   const areas = await fetchAreas().catch((error) => {
     console.error("Failed to load areas:", error)
     return []
@@ -141,24 +143,26 @@ export default async function Home() {
   const areaMapSummaries = mapSummaries(areasWithRoutes, rocks)
   const individualRockMapSummaries = rockMapSummaries(areasWithRoutes, rocks)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.munichclimbs.de"
+  const isEnglish = locale === "en"
+  const localizedHomeUrl = new URL(isEnglish ? "/en" : "/", siteUrl).toString()
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "WebSite",
         "@id": `${siteUrl}/#website`,
-        url: `${siteUrl}/`,
+        url: localizedHomeUrl,
         name: "Munichclimbs",
-        inLanguage: "de-DE",
+        inLanguage: isEnglish ? "en-US" : "de-DE",
       },
       {
         "@type": "ItemList",
-        name: "Klettergebiete um München",
+        name: isEnglish ? "Climbing areas around Munich" : "Klettergebiete um München",
         itemListElement: onlineAreas.map((area, index) => ({
           "@type": "ListItem",
           position: index + 1,
           name: area.name,
-          url: new URL(`/${getAreaSlug(area)}`, siteUrl).toString(),
+          url: new URL(`${isEnglish ? "/en" : ""}/${getAreaSlug(area)}`, siteUrl).toString(),
         })),
       },
     ],

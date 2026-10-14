@@ -26,6 +26,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `Klettergebiet ${area.name} | Munichclimbs`,
       description: `Klettergebiet ${area.name} – Felsen und Routen`,
       url: `/${slug}`,
+      locale: "de_DE",
+      alternateLocale: "en_US",
     },
   }
 }

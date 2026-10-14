@@ -63,6 +63,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${rock.name} im Klettergebiet ${area.name} | Munichclimbs`,
       description: `Felsen ${rock.name} im Klettergebiet ${area.name} – Routen, Grad und Erstbegeher.`,
       url: `/${slug}/${rockSlug}`,
+      locale: "de_DE",
+      alternateLocale: "en_US",
     },
   }
 }

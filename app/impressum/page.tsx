@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     title: "Impressum | Munichclimbs",
     description: "Impressum von munichclimbs",
     url: "/impressum",
+    locale: "de_DE",
   },
 }
 

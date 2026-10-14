@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     title: "Datenschutz | Munichclimbs",
     description: "Datenschutzerklärung von munichclimbs",
     url: "/datenschutz",
+    locale: "de_DE",
   },
 }
 

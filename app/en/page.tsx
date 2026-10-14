@@ -17,7 +17,10 @@ export const metadata: Metadata = {
     description: "Climbing around Munich. Climbing areas, crags and routes at a glance.",
     url: englishCanonicalPath("/"),
     locale: "en_US",
+    alternateLocale: "de_DE",
   },
 }
 
-export default GermanHome
+export default function EnglishHome() {
+  return <GermanHome locale="en" />
+}

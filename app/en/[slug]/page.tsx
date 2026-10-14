@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: englishCanonicalPath(path),
       locale: "en_US",
+      alternateLocale: "de_DE",
     },
   }
 }

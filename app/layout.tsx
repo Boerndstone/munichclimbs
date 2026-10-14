@@ -39,6 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "de_DE",
+    alternateLocale: "en_US",
     siteName: "Munichclimbs",
     title: "Munichclimbs",
     description: "Klettern rund um München – Klettergebiete, Felsen und Touren.",
