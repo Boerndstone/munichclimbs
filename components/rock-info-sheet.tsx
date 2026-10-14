@@ -1,10 +1,10 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import {
   Info,
   AlertTriangle,
-  Bike,
   FileText,
   HandHeart,
   Images,
@@ -14,22 +14,23 @@ import {
   Route,
   ShieldAlert,
   Star,
-  Train,
 } from "lucide-react"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { RouteGradeHistogram } from "@/components/route-grade-histogram"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import type { RouteSummary } from "@/lib/api"
+import type { PhotoSummary, VideoSummary } from "@/lib/api"
 import type { Rock } from "@/types/rock"
+import { galleryImageUrl } from "@/lib/media"
 
 type Props = {
   rock: Rock
-  areaName: string
   railwayStation?: unknown
-  routeCount: number
   routes: RouteSummary[]
+  photos: PhotoSummary[]
+  videos: VideoSummary[]
 }
 
 type RailwayAccess = { stationName: string; minutes: number; mode: "walk" | "bike" }
@@ -108,7 +109,7 @@ function BooleanValue({ value, label }: { value: boolean | null | undefined; lab
   return value ? label : "Nein"
 }
 
-export function RockInfoSheet({ rock, areaName, railwayStation, routeCount, routes }: Props) {
+export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: Props) {
   const description = textFrom(rock, ["description", "rockDescription"])
   const access = textFrom(rock, ["access", "rockAccess"])
   const nature = textFrom(rock, ["nature", "rockNature"])
@@ -135,6 +136,7 @@ export function RockInfoSheet({ rock, areaName, railwayStation, routeCount, rout
       <SheetContent side="right" className="w-full gap-0 overflow-y-auto border-l border-black bg-white p-0 text-black sm:max-w-[24rem]">
         <SheetHeader className="shrink-0 border-b border-black px-3 py-2 pr-12 text-black">
           <SheetTitle className="text-black">{rock.name}</SheetTitle>
+          <SheetDescription className="sr-only">Informationen, Anfahrt, Karte, Bilder und Hinweise für den Fels {rock.name}.</SheetDescription>
         </SheetHeader>
 
         <div className="min-h-0 flex-1">
@@ -213,8 +215,29 @@ export function RockInfoSheet({ rock, areaName, railwayStation, routeCount, rout
 
             <AccordionItem value="images">
               <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Images}>Bilder</SectionTitle></AccordionTrigger>
-              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p>Bilder zu diesem Fels erscheinen hier, sobald sie über die Bild-API verfügbar sind.</p></AccordionContent>
+              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black">
+                {photos.length > 0 ? <div className="grid grid-cols-2 gap-2">
+                  {photos.map((photo) => (
+                    <a key={photo.id} href={galleryImageUrl(photo.name)} target="_blank" rel="noopener noreferrer" className="group block overflow-hidden rounded-md border border-border">
+                      <Image
+                        src={galleryImageUrl(photo.name)}
+                        alt={photo.description?.trim() || `Foto vom Fels ${rock.name}`}
+                        width={480}
+                        height={480}
+                        sizes="(max-width: 640px) 50vw, 12rem"
+                        className="aspect-square w-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      {(photo.description || photo.photgrapher) && <span className="block p-2 text-xs text-muted-foreground">{photo.description}{photo.description && photo.photgrapher ? " · " : ""}{photo.photgrapher}</span>}
+                    </a>
+                  ))}
+                </div> : <p>Für diesen Fels sind noch keine veröffentlichten Bilder vorhanden.</p>}
+              </AccordionContent>
             </AccordionItem>
+
+            {videos.length > 0 && <AccordionItem value="videos">
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Images}>Videos</SectionTitle></AccordionTrigger>
+              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><ul className="space-y-2">{videos.filter((video) => video.videoLink).map((video) => <li key={video.id}><a className="underline decoration-dotted underline-offset-2" href={video.videoLink!} target="_blank" rel="noopener noreferrer">Video öffnen</a></li>)}</ul></AccordionContent>
+            </AccordionItem>}
 
             <AccordionItem value="symbols">
               <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Mountain}>Zeichenerklärung</SectionTitle></AccordionTrigger>

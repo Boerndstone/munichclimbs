@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Impressum",
   description: "Impressum von munichclimbs",
+  alternates: { canonical: "/impressum" },
 }
 
 export default function ImpressumPage() {

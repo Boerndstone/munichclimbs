@@ -5,18 +5,23 @@ import { notFound } from "next/navigation"
 
 import {
   fetchAreaBySlug,
+  fetchCommentsForRock,
+  fetchPhotosForRock,
   fetchRocksForArea,
   fetchRockTranslation,
   fetchRoutesForArea,
   fetchToposForRock,
+  fetchVideosForRock,
 } from "@/lib/api"
-import { Badge } from "@/components/ui/badge"
 import { RockInfoSheet } from "@/components/rock-info-sheet"
 import { RockTopoSections } from "@/components/rock-topo-sections"
 import type { Rock } from "@/types/rock"
 import type { Metadata } from "next"
+import { headerImageUrl } from "@/lib/media"
 
 type Props = { params: Promise<{ slug: string; rockSlug: string }> }
+
+export const revalidate = 300
 
 function extractId(iri: string) {
   return iri.split("/").filter(Boolean).at(-1) ?? ""
@@ -37,7 +42,7 @@ function routeRockId(route: { rock?: { "@id"?: string; id?: number; name?: strin
 
 function rockHeroImage(image: unknown) {
   if (typeof image !== "string" || image.length === 0) return null
-  return `https://www.munichclimbs.de/uploads/header/${image}-large-@1x.webp`
+  return headerImageUrl(image)
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -52,6 +57,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: { absolute: `Munichclimbs | Klettergebiet ${area.name} | Fels ${rock.name}` },
     description: `Felsen ${rock.name} im Klettergebiet ${area.name} – Routen, Grad und Erstbegeher.`,
+    alternates: { canonical: `/${slug}/${rockSlug}` },
+    openGraph: {
+      title: `${rock.name} im Klettergebiet ${area.name} | Munichclimbs`,
+      description: `Felsen ${rock.name} im Klettergebiet ${area.name} – Routen, Grad und Erstbegeher.`,
+      url: `/${slug}/${rockSlug}`,
+    },
   }
 }
 
@@ -69,16 +80,29 @@ export default async function RockPage({ params }: Props) {
 
   const routes = areaRoutes
     .filter((route) => routeRockId(route) === String(rock.id))
-    .sort((left, right) => (left.name ?? "").localeCompare(right.name ?? "", "de"))
-  const [topos, translation] = await Promise.all([
+    // Route numbers are the established topo reading order. Names are only a
+    // deterministic fallback for legacy rows without a number.
+    .sort((left, right) => {
+      const topoOrder = (left.topoId ?? Number.MAX_SAFE_INTEGER) - (right.topoId ?? Number.MAX_SAFE_INTEGER)
+      if (topoOrder !== 0) return topoOrder
+
+      const numberOrder = (left.nr ?? Number.MAX_SAFE_INTEGER) - (right.nr ?? Number.MAX_SAFE_INTEGER)
+      if (numberOrder !== 0) return numberOrder
+
+      return (left.name ?? "").localeCompare(right.name ?? "", "de")
+    })
+  const [topos, translation, comments, photos, videos] = await Promise.all([
     fetchToposForRock(rock.id),
     fetchRockTranslation(rock.id),
+    fetchCommentsForRock(rock.id),
+    fetchPhotosForRock(rock.id),
+    fetchVideosForRock(rock.id),
   ])
   const rockWithTranslation = { ...rock, ...translation }
   const heroImage = rockHeroImage(rock.image)
 
   return (
-    <main>
+    <div className="rock-page">
       <section className="relative w-full">
         <div className="h-[220px] overflow-hidden bg-muted sm:h-[300px]">
           {heroImage ? (
@@ -114,7 +138,7 @@ export default async function RockPage({ params }: Props) {
                 </nav>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <RockInfoSheet rock={rockWithTranslation} areaName={area.name} railwayStation={area.railwayStation} routeCount={routes.length} routes={routes} />
+                <RockInfoSheet rock={rockWithTranslation} railwayStation={area.railwayStation} routes={routes} photos={photos} videos={videos} />
               </div>
             </div>
           </div>
@@ -123,9 +147,9 @@ export default async function RockPage({ params }: Props) {
 
       <div className="mx-auto w-full max-w-[1024px] px-2 py-4 sm:px-4">
         <div className="min-w-0 md:w-3/4">
-          <RockTopoSections topos={topos} routes={routes} />
+          <RockTopoSections topos={topos} routes={routes} comments={comments} />
         </div>
       </div>
-    </main>
+    </div>
   )
 }

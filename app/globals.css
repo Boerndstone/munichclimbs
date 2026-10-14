@@ -167,6 +167,11 @@
     @apply cursor-pointer;
   }
 
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
   .chelsea-market-regular {
     font-family: var(--font-munich-brand), system-ui;
     font-weight: 400;
@@ -227,6 +232,19 @@ main:has(.area-page) {
 }
 
 main:has(.area-page) > div {
+  max-width: none;
+  gap: 0;
+  padding: 0;
+}
+
+/* Rock pages use the same full-bleed hero and sector rail as the existing
+   Symfony public frontend; the topo content itself stays on its narrower rail. */
+main:has(.rock-page) {
+  max-width: none;
+  padding: 50px 0 2rem;
+}
+
+main:has(.rock-page) > div {
   max-width: none;
   gap: 0;
   padding: 0;

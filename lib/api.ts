@@ -1,11 +1,37 @@
+import "server-only"
+
 import type { Area, AreasResponse } from "@/types/area"
 import type { Rock } from "@/types/rock"
 import { getAreaSlug, slugifyAreaName } from "@/lib/slugify"
 
-const API_BASE_URL = "https://www.munichclimbs.de/api/v1"
-// Public climbing data changes infrequently. Revalidate in the background instead
-// of blocking every page transition on a round trip to the Symfony API.
-const API_FETCH_OPTIONS = { next: { revalidate: 300 } } as const
+const API_BASE_URL = process.env.MUNICHCLIMBS_API_URL ?? (
+  process.env.NODE_ENV === "development"
+    ? "http://127.0.0.1:8083/api/v1"
+    : "https://www.munichclimbs.de/api/v1"
+)
+
+/** Public climbing data changes infrequently; stale data is served while Next refreshes it. */
+export const DATA_REVALIDATE_SECONDS = 300
+
+type CacheTag = string
+
+function apiUrl(path: string): string {
+  return path.startsWith("http") ? path : `${API_BASE_URL}${path}`
+}
+
+/**
+ * The only fetch boundary for server-rendered climbing data. Next deduplicates
+ * identical requests within a render and persists these tagged responses between
+ * requests for the configured revalidation window.
+ */
+async function fetchApi(path: string, tags: CacheTag[]): Promise<Response> {
+  return fetch(apiUrl(path), {
+    next: {
+      revalidate: DATA_REVALIDATE_SECONDS,
+      tags,
+    },
+  })
+}
 
 /**
  * Fetches areas from the API
@@ -14,7 +40,7 @@ const API_FETCH_OPTIONS = { next: { revalidate: 300 } } as const
  */
 export async function fetchAreas(): Promise<Area[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/areas`, API_FETCH_OPTIONS)
+    const response = await fetchApi("/areas", ["areas"])
 
     if (!response.ok) {
       throw new Error(`Failed to fetch areas: ${response.status} ${response.statusText}`)
@@ -54,7 +80,7 @@ export async function fetchAreas(): Promise<Area[]> {
 
 export async function fetchRocks(): Promise<Rock[]> {
   try {
-    const rocks = await fetchHydraCollection<Rock>(`${API_BASE_URL}/rocks?itemsPerPage=100`)
+    const rocks = await fetchHydraCollection<Rock>("/rocks?itemsPerPage=100", ["rocks"])
     return rocks.map((rock) => {
       return {
         ...rock,
@@ -130,18 +156,40 @@ export interface RockTranslationSummary {
   flowers?: string | null
 }
 
+export interface CommentSummary {
+  id: number
+  comment: string
+  datetime?: string | null
+  route?: ApiReference
+  user?: { username?: string | null; avatarUrl?: string | null } | null
+}
+
+export interface PhotoSummary {
+  id: number
+  name: string
+  description?: string | null
+  photgrapher?: string | null
+  belongsToRoute?: ApiReference | null
+}
+
+export interface VideoSummary {
+  id: number
+  videoLink?: string | null
+  videoRoutes?: ApiReference | null
+}
+
 interface HydraCollection<T> {
   "hydra:member"?: T[]
   "hydra:view"?: { "hydra:next"?: string }
 }
 
-async function fetchHydraCollection<T>(url: string): Promise<T[]> {
+async function fetchHydraCollection<T>(path: string, tags: CacheTag[]): Promise<T[]> {
   const items: T[] = []
-  let nextUrl: string | undefined = url
+  let nextUrl: string | undefined = apiUrl(path)
 
   // Follow API Platform's pagination links so a busy area does not lose routes.
   while (nextUrl) {
-    const response = await fetch(nextUrl, API_FETCH_OPTIONS)
+    const response = await fetchApi(nextUrl, tags)
     if (!response.ok) {
       throw new Error(`Failed to fetch collection: ${response.status}`)
     }
@@ -158,9 +206,9 @@ async function fetchHydraCollection<T>(url: string): Promise<T[]> {
 /** Returns the most recently updated public topo with a usable drawing and image. */
 export async function fetchLatestTopo(): Promise<TopoSummary | null> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/topos?order[updatedAt]=desc&itemsPerPage=1`,
-      API_FETCH_OPTIONS
+    const response = await fetchApi(
+      "/topos?order[updatedAt]=desc&itemsPerPage=1",
+      ["topos"]
     )
     if (!response.ok) return null
 
@@ -176,7 +224,8 @@ export async function fetchLatestTopo(): Promise<TopoSummary | null> {
 export async function fetchToposForRock(rockId: string | number): Promise<TopoSummary[]> {
   try {
     return await fetchHydraCollection<TopoSummary>(
-      `${API_BASE_URL}/topos?rocks.id=${encodeURIComponent(String(rockId))}&order[number]=asc`
+      `/topos?rocks.id=${encodeURIComponent(String(rockId))}&order[number]=asc&itemsPerPage=100`,
+      ["topos", `rock-${rockId}`]
     )
   } catch (error) {
     console.error("Error fetching rock topos:", error)
@@ -191,7 +240,8 @@ export async function fetchRockTranslation(
 ): Promise<RockTranslationSummary | null> {
   try {
     const translations = await fetchHydraCollection<RockTranslationSummary>(
-      `${API_BASE_URL}/rock_translations?rock.id=${encodeURIComponent(String(rockId))}&locale=${encodeURIComponent(locale)}`
+      `/rock_translations?rock.id=${encodeURIComponent(String(rockId))}&locale=${encodeURIComponent(locale)}`,
+      ["rock-translations", `rock-${rockId}`]
     )
     return translations[0] ?? null
   } catch (error) {
@@ -200,12 +250,36 @@ export async function fetchRockTranslation(
   }
 }
 
+/** Returns every published route comment for one rock in a single API request. */
+export async function fetchCommentsForRock(rockId: string | number): Promise<CommentSummary[]> {
+  return fetchHydraCollection<CommentSummary>(
+    `/comments?route.rock.id=${encodeURIComponent(String(rockId))}&itemsPerPage=100`,
+    ["comments", `rock-${rockId}`]
+  )
+}
+
+/** Returns approved gallery records for one rock. Image URLs are built by lib/media.ts. */
+export async function fetchPhotosForRock(rockId: string | number): Promise<PhotoSummary[]> {
+  return fetchHydraCollection<PhotoSummary>(
+    `/photos?belongsToRock.id=${encodeURIComponent(String(rockId))}&itemsPerPage=100`,
+    ["photos", `rock-${rockId}`]
+  )
+}
+
+/** Returns public video links assigned to one rock. */
+export async function fetchVideosForRock(rockId: string | number): Promise<VideoSummary[]> {
+  return fetchHydraCollection<VideoSummary>(
+    `/videos?videoRocks.id=${encodeURIComponent(String(rockId))}&itemsPerPage=100`,
+    ["videos", `rock-${rockId}`]
+  )
+}
+
 /** Returns the five newest public routes, ordered like the Munich homepage. */
 export async function fetchLatestRoutes(): Promise<LatestRouteSummary[]> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/routes?order[yearFirstAscent]=desc&itemsPerPage=5`,
-      API_FETCH_OPTIONS
+    const response = await fetchApi(
+      "/routes?order[yearFirstAscent]=desc&itemsPerPage=5",
+      ["routes"]
     )
     if (!response.ok) return []
 
@@ -221,8 +295,8 @@ export async function fetchLatestRoutes(): Promise<LatestRouteSummary[]> {
 export async function fetchBannedRocks(): Promise<BannedRockSummary[]> {
   try {
     const [spring, summer] = await Promise.all([
-      fetchHydraCollection<BannedRockSummary>(`${API_BASE_URL}/rocks?banned=1`),
-      fetchHydraCollection<BannedRockSummary>(`${API_BASE_URL}/rocks?banned=2`),
+      fetchHydraCollection<BannedRockSummary>("/rocks?banned=1", ["rocks"]),
+      fetchHydraCollection<BannedRockSummary>("/rocks?banned=2", ["rocks"]),
     ])
     return [...spring, ...summer]
   } catch (error) {
@@ -244,7 +318,7 @@ export async function fetchAreaBySlug(slug: string): Promise<AreaWithRocks | nul
     // Fetch full area with rocks from /api/areas/{id}
     const id = typeof area.id === "string" ? parseInt(area.id, 10) : area.id
     if (Number.isNaN(id)) return null
-    const res = await fetch(`${API_BASE_URL}/areas/${id}`, API_FETCH_OPTIONS)
+    const res = await fetchApi(`/areas/${id}`, ["areas", `area-${id}`])
     if (!res.ok) return null
     const data = (await res.json()) as AreaWithRocks
     return data
@@ -259,7 +333,7 @@ export async function fetchAreaBySlug(slug: string): Promise<AreaWithRocks | nul
  */
 export async function fetchRouteCountForRock(rockId: string | number): Promise<number> {
   try {
-    const res = await fetch(`${API_BASE_URL}/routes?rock.id=${rockId}`, API_FETCH_OPTIONS)
+    const res = await fetchApi(`/routes?rock.id=${rockId}`, ["routes", `rock-${rockId}`])
     if (!res.ok) return 0
     const data = (await res.json()) as { "hydra:totalItems"?: number }
     return data["hydra:totalItems"] ?? 0
@@ -272,7 +346,8 @@ export async function fetchRouteCountForRock(rockId: string | number): Promise<n
 export async function fetchRocksForArea(areaId: string | number): Promise<Rock[]> {
   try {
     return await fetchHydraCollection<Rock>(
-      `${API_BASE_URL}/rocks?area.id=${encodeURIComponent(String(areaId))}`
+      `/rocks?area.id=${encodeURIComponent(String(areaId))}`,
+      ["rocks", `area-${areaId}`]
     )
   } catch (error) {
     console.error("Error fetching rocks for area:", error)
@@ -284,7 +359,8 @@ export async function fetchRocksForArea(areaId: string | number): Promise<Rock[]
 export async function fetchRoutesForArea(areaId: string | number): Promise<RouteSummary[]> {
   try {
     return await fetchHydraCollection<RouteSummary>(
-      `${API_BASE_URL}/routes?area.id=${encodeURIComponent(String(areaId))}&itemsPerPage=100`
+      `/routes?area.id=${encodeURIComponent(String(areaId))}&itemsPerPage=100`,
+      ["routes", `area-${areaId}`]
     )
   } catch (error) {
     console.error("Error fetching routes for area:", error)

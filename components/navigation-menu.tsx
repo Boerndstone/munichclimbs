@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChartNoAxesCombined, ChevronRight, Menu, Moon, Settings, Sun } from "lucide-react"
-import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { getAreaSlug } from "@/lib/slugify"
@@ -29,12 +29,8 @@ function NavigationArea({ area }: { area: Area }) {
   const isCurrentArea = pathname === areaPath || pathname.startsWith(`${areaPath}/`)
   const [isOpen, setIsOpen] = useState(isCurrentArea)
 
-  useEffect(() => {
-    if (isCurrentArea) setIsOpen(true)
-  }, [isCurrentArea])
-
   return (
-    <Collapsible asChild open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible asChild open={isCurrentArea || isOpen} onOpenChange={setIsOpen}>
       <li>
         <CollapsibleTrigger asChild>
           <Button variant="ghost" className="h-auto w-full justify-start gap-2 px-2 py-2 text-left text-sm font-normal text-foreground hover:cursor-pointer" >
@@ -48,7 +44,7 @@ function NavigationArea({ area }: { area: Area }) {
             <span className="size-[18px] shrink-0 rounded bg-muted" aria-hidden="true" />
           )}
           <span className="min-w-0 flex-1 truncate text-left">{area.name}</span>
-          <ChevronRight className={`size-4 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} aria-hidden="true" />
+          <ChevronRight className={`size-4 shrink-0 transition-transform duration-200 ${(isCurrentArea || isOpen) ? "rotate-90" : ""}`} aria-hidden="true" />
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="pb-1 pl-7 pr-2">
@@ -82,6 +78,7 @@ function NavigationArea({ area }: { area: Area }) {
 
 export function NavigationMenu({ areas }: { areas: Area[] }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const settingsTriggerRef = useRef<HTMLButtonElement>(null)
   const [dark, setDark] = useState(() => {
     if (typeof window === "undefined") return false
 
@@ -100,6 +97,11 @@ export function NavigationMenu({ areas }: { areas: Area[] }) {
     window.localStorage.setItem("theme", nextDark ? "dark" : "light")
   }
 
+  function closeSettings() {
+    setSettingsOpen(false)
+    window.requestAnimationFrame(() => settingsTriggerRef.current?.focus())
+  }
+
   const visibleAreas = areas.filter(isOnline)
 
   return (
@@ -114,6 +116,7 @@ export function NavigationMenu({ areas }: { areas: Area[] }) {
             </SheetTrigger>
             <SheetContent side="left" className="w-[min(100vw,20rem)] gap-0 p-0 sm:max-w-none">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
+              <SheetDescription className="sr-only">Liste der Klettergebiete und Felsen.</SheetDescription>
               <div className="flex h-full min-h-0 flex-col bg-background">
                 <div className="flex shrink-0 items-center border-b border-border px-3 py-2">
                   <Link href="/" className="chelsea-market-regular text-lg no-underline">
@@ -140,20 +143,14 @@ export function NavigationMenu({ areas }: { areas: Area[] }) {
         <SearchModal areas={visibleAreas} />
 
         <div className="relative shrink-0">
-          <button onClick={() => setSettingsOpen((open) => !open)} className="inline-flex size-9 items-center justify-center rounded-md hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-expanded={settingsOpen} aria-label="Einstellungen öffnen">
+          <button ref={settingsTriggerRef} onClick={() => setSettingsOpen((open) => !open)} className="inline-flex size-9 items-center justify-center rounded-md hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-expanded={settingsOpen} aria-controls="navigation-settings" aria-haspopup="menu" aria-label="Einstellungen öffnen">
             <Settings className="size-[18px]" />
           </button>
           {settingsOpen && (
-            <div className="absolute end-0 top-[calc(100%+6px)] z-[1070] w-max min-w-0 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg)] py-1 text-[var(--theme-text)] shadow-lg ring-1 ring-black/5 dark:ring-white/10">
+            <div id="navigation-settings" role="menu" aria-label="Einstellungen" onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); closeSettings() } }} className="absolute end-0 top-[calc(100%+6px)] z-[1070] w-max min-w-0 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg)] py-1 text-[var(--theme-text)] shadow-lg ring-1 ring-black/5 dark:ring-white/10">
               <div className="flex flex-wrap items-center gap-3 px-2 py-2">
-                <div className="inline-flex shrink-0 px-1">
-                  <button onClick={toggleTheme} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent">
-                    {dark ? <Moon className="size-4" /> : <Sun className="size-4" />}
-                  </button>
-                </div>
-                <span className="inline-block h-5 w-px shrink-0 self-center bg-[var(--theme-border)]" aria-hidden="true"></span>
                 <div className="px-1">
-                  <button onClick={toggleTheme} className="focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg text-[var(--theme-text)] hover:cursor-pointer">
+                  <button onClick={toggleTheme} role="menuitem" aria-label={dark ? "Helles Farbschema aktivieren" : "Dunkles Farbschema aktivieren"} className="focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg text-[var(--theme-text)] hover:cursor-pointer">
                     {dark ? <Moon className="size-4" /> : <Sun className="size-4" />}
                   </button>
                 </div>

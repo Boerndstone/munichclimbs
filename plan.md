@@ -51,7 +51,7 @@ This means the work is a controlled parity migration and refinement—not a blan
 
 ### Phase 0 — Establish the migration contract
 
-**Progress:** Route/API inventory and the desktop/mobile light/dark visual baseline are complete. See `../munich/apps/backoffice/docs/public-frontend-api-inventory.json` and `reference-screenshots.md`.
+**Progress:** Items 1–4 are complete. The machine-readable route/API inventory is at `../munich/apps/backoffice/docs/public-frontend-api-inventory.json`; the visual baseline is in `reference-screenshots.md`; the data-gap comparison and proposed sign-off criteria are in `docs/migration-inventory.md`. Item 5 remains a route-level acceptance checklist until each implementation phase is verified.
 
 1. Make a machine-readable route inventory from the Symfony controllers, including every German/English URL, redirect, HTTP status, canonical URL, title, description, and JSON-LD type.
 2. Capture desktop and mobile reference screenshots for the home page, one area page, and one rock page in both themes.
@@ -64,6 +64,8 @@ This means the work is a controlled parity migration and refinement—not a blan
 ### Phase 1 — Make the shared shell visually identical
 
 **Progress:** The shared visual foundation now uses the existing local Inter and Chelsea Market files, frontend theme and grade tokens, compact shadcn Card, Button, and Switch primitives, plus scoped `.typeset` content typography. No Twig templates or Stimulus controllers were copied.
+
+**Data rendering:** Page and layout data are loaded only through the server-only API boundary. Responses use tagged Next fetch caching with a five-minute revalidation window; client components receive data as props and remain limited to interaction such as filters, dialogs, maps, tabs, galleries, theme, and search.
 
 1. Port the Inter and Chelsea Market font files/licensing configuration into `public/fonts` or a suitable Next font setup.
 2. Align `app/globals.css` tokens with the current frontend’s `app.css` and `global.scss`: colours, radii, shadows, typography, dark theme, and the scoped `.typeset` treatment for long-form content.

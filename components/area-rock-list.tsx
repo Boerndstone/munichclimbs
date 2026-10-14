@@ -81,9 +81,43 @@ export function AreaRockList({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
-      <div className="order-2 min-w-0 md:col-span-8 lg:order-1">
-        <ul className="space-y-2">
+    <div className="min-w-0">
+      <Card className="mb-2 gap-0 py-0 lg:sticky lg:top-[74px] lg:z-10">
+        <CardHeader className="px-3 pb-2 pt-3">
+          <CardTitle className="text-base font-medium">
+            {visibleRows.length} {visibleRows.length === 1 ? "Fels" : "Felsen"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-3 gap-x-2 gap-y-2 px-3 pb-3 sm:flex sm:flex-wrap sm:gap-3">
+          {filters.map(({ id, label }) => {
+            const active = activeFilters.includes(id)
+
+            return (
+              <div key={id} className="inline-flex min-w-0 items-center gap-1.5 sm:shrink-0 sm:gap-2">
+                <label
+                  htmlFor={`area-filter-${id}`}
+                  className="flex cursor-pointer items-center"
+                  title={label}
+                >
+                  <FilterIcon filter={id} />
+                  <span className="sr-only">{label}</span>
+                </label>
+                <Switch
+                  id={`area-filter-${id}`}
+                  checked={active}
+                  onCheckedChange={() => toggleFilter(id)}
+                  aria-label={label}
+                  aria-describedby={`area-filter-${id}-description`}
+                />
+                <span id={`area-filter-${id}-description`} className="sr-only">
+                  {active ? `${label}: aktiv` : `${label}: inaktiv`}
+                </span>
+              </div>
+            )
+          })}
+        </CardContent>
+      </Card>
+      <ul className="space-y-2">
           {visibleRows.map(({ rock, routes }) => (
             <RockListCard
               key={rock.id}
@@ -93,47 +127,12 @@ export function AreaRockList({
               routes={routes}
             />
           ))}
-        </ul>
-        {visibleRows.length === 0 && (
-          <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-            Für diese Filterkombination wurden keine Felsen gefunden.
-          </p>
-        )}
-      </div>
-
-      <aside className="order-1 min-w-0 md:col-span-4 lg:order-2">
-        <Card className="gap-0 py-0 lg:sticky lg:top-[74px]">
-          <CardHeader className="px-3 py-3">
-            <CardTitle className="text-base font-medium">
-              {visibleRows.length} {visibleRows.length === 1 ? "Fels" : "Felsen"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-nowrap gap-3 overflow-x-auto px-3 pb-3 md:flex-wrap md:overflow-x-visible">
-            {filters.map(({ id, label }) => {
-              const active = activeFilters.includes(id)
-
-              return (
-                <div key={id} className="inline-flex shrink-0 items-center gap-2">
-                  <label
-                    htmlFor={`area-filter-${id}`}
-                    className="flex cursor-pointer items-center"
-                    title={label}
-                  >
-                    <FilterIcon filter={id} />
-                    <span className="sr-only">{label}</span>
-                  </label>
-                  <Switch
-                    id={`area-filter-${id}`}
-                    checked={active}
-                    onCheckedChange={() => toggleFilter(id)}
-                    aria-label={label}
-                  />
-                </div>
-              )
-            })}
-          </CardContent>
-        </Card>
-      </aside>
+      </ul>
+      {visibleRows.length === 0 && (
+        <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+          Für diese Filterkombination wurden keine Felsen gefunden.
+        </p>
+      )}
     </div>
   )
 }

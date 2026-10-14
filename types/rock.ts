@@ -1,5 +1,7 @@
 export interface Rock {
   id: string | number
+  "@id"?: string
+  area?: string | { id?: string | number; "@id"?: string; name?: string; slug?: string }
   name: string
   slug?: string
   url?: string
