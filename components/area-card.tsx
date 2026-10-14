@@ -8,6 +8,7 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card"
 type Props = {
   area: Area
   routes: RouteSummary[]
+  rockCount?: number
   priority?: boolean
 }
 
@@ -24,7 +25,7 @@ function chartIndex(route: RouteSummary): number {
   return Math.min(8, Math.max(0, number - 3))
 }
 
-function GradeHistogram({ area, routes }: { area: Area; routes?: RouteSummary[] }) {
+function GradeHistogram({ area, routes, rockCount }: { area: Area; routes?: RouteSummary[]; rockCount?: number }) {
   const routeList = Array.isArray(routes) ? routes : []
   const counts = Array.from({ length: 10 }, () => 0)
   routeList.forEach((route) => { counts[chartIndex(route)] += 1 })
@@ -39,12 +40,12 @@ function GradeHistogram({ area, routes }: { area: Area; routes?: RouteSummary[] 
   const bars = counts
     .map((count, index) => ({ count, index, label: index === 9 ? "Proj." : String(index + 3) }))
     .filter((bar) => bar.count > 0)
-  const rockCount = Array.isArray(area.rocks) ? area.rocks.length : 0
+  const publishedRockCount = rockCount ?? (Array.isArray(area.rocks) ? area.rocks.length : 0)
 
   return (
     <div className="mt-auto">
       <p className="mb-2 text-left text-xs font-medium tabular-nums text-foreground">
-        {routeList.length} Touren · {rockCount} Felsen
+        {routeList.length} Touren · {publishedRockCount} Felsen
       </p>
       <div className="flex justify-between text-[10px] leading-tight text-muted-foreground">
         <span>Anzahl</span>
@@ -53,7 +54,7 @@ function GradeHistogram({ area, routes }: { area: Area; routes?: RouteSummary[] 
       <div
         className="mt-1 grid h-28 grid-cols-[1.75rem_minmax(0,1fr)]"
         role="img"
-        aria-label={`Klettergebiet ${area.name}. Insgesamt ${routeList.length} Touren, ${rockCount} Felsen. Routen je Gradstufe.`}
+        aria-label={`Klettergebiet ${area.name}. Insgesamt ${routeList.length} Touren, ${publishedRockCount} Felsen. Routen je Gradstufe.`}
       >
         <div className="flex flex-col justify-between border-r border-border pr-1 text-right text-[8px] leading-none text-muted-foreground" aria-hidden="true">
           <span>{scaleMax}</span>
@@ -84,14 +85,14 @@ function GradeHistogram({ area, routes }: { area: Area; routes?: RouteSummary[] 
   )
 }
 
-export function AreaCard({ area, routes, priority = false }: Props) {
+export function AreaCard({ area, routes, rockCount, priority = false }: Props) {
   const href = `/${getAreaSlug(area)}`
 
   return (
     <Link href={href} className="block text-foreground no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
       <Card className="mb-0 gap-0 overflow-hidden rounded-lg border-border py-0 shadow-md">
         <div className="grid grid-cols-1 gap-0 md:grid-cols-2">
-          <div className="relative min-h-[196px] min-w-0 bg-muted">
+          <div className="relative min-h-[196px] min-w-0 bg-muted md:min-h-[216px]">
             {area.image ? (
               <Image
                 src={`https://www.munichclimbs.de/uploads/areas/${area.image}.webp`}
@@ -113,7 +114,7 @@ export function AreaCard({ area, routes, priority = false }: Props) {
 
           <CardContent className="flex min-w-0 flex-col p-3">
               <CardTitle className="hidden text-base font-medium md:block">{area.name}</CardTitle>
-            <GradeHistogram area={area} routes={routes} />
+            <GradeHistogram area={area} routes={routes} rockCount={rockCount} />
           </CardContent>
         </div>
       </Card>

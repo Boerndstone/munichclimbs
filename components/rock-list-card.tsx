@@ -116,23 +116,25 @@ export function RockListCard({ areaName, areaSlug, rock, routes }: Props) {
           )}
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5 px-3 py-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-1 px-3 py-2">
           <div className="min-w-0 flex items-center justify-between">
             <h2 className="mb-0 min-w-0 max-w-[150px] truncate text-base font-normal leading-tight lg:max-w-none">{rock.name}</h2>
             <div className="mt-0.5 flex flex-wrap items-center gap-1 text-sm text-gray-800 dark:text-gray-200">
               {(height !== null || orientation) && (
+                <>
                   <p className="mb-0">{height !== null && `${height} m`}</p>
-                  // {height !== null && orientation && <span className="h-3.5 w-px shrink-0 bg-gray-400 dark:bg-gray-600">|</span>}
-                  // <p className="mb-0">{orientation}</p>
+                  {height !== null && orientation && <span className="h-3.5 w-px shrink-0 bg-gray-400 dark:bg-gray-600" aria-hidden="true" />}
+                  {orientation && <p className="mb-0">{orientation}</p>}
+                </>
               )}
             </div>
           </div>
 
           {segments.length > 0 && (
-            <div className="mt-3 flex min-w-0 gap-2" aria-label={`${routes.length} Routen nach Schwierigkeitsgrad`}>
+            <div className="mt-1 flex min-w-0 gap-2" aria-label={`${routes.length} Routen nach Schwierigkeitsgrad`}>
               <span className="w-6 shrink-0 self-end text-sm leading-none tabular-nums">{routes.length}</span>
               <div className="min-w-0 flex-1">
-                <div className="mb-1 flex text-center text-[11px] leading-none tabular-nums text-black">
+                <div className="mb-0.5 flex text-center text-[11px] leading-none tabular-nums text-black">
                   {segments.map(({ bucket, count }) => (
                     <span key={String(bucket)} className="min-w-0 flex-1">{count}</span>
                   ))}

@@ -1,5 +1,7 @@
 import { fetchRocks } from "@/lib/api"
 
+export const revalidate = 300
+
 export default async function Rocks({ params }: { params: { slug: string } }) {
   const rocks = await fetchRocks().catch((error) => {
     console.error("Failed to load rocks:", error)

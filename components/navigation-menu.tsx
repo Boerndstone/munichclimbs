@@ -29,12 +29,8 @@ function NavigationArea({ area }: { area: Area }) {
   const isCurrentArea = pathname === areaPath || pathname.startsWith(`${areaPath}/`)
   const [isOpen, setIsOpen] = useState(isCurrentArea)
 
-  useEffect(() => {
-    if (isCurrentArea) setIsOpen(true)
-  }, [isCurrentArea])
-
   return (
-    <Collapsible asChild open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible asChild open={isCurrentArea || isOpen} onOpenChange={setIsOpen}>
       <li>
         <CollapsibleTrigger asChild>
           <Button variant="ghost" className="h-auto w-full justify-start gap-2 px-2 py-2 text-left text-sm font-normal text-foreground hover:cursor-pointer" >

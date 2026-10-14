@@ -20,7 +20,15 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: { absolute: "Munichclimbs" },
   description: "Klettern rund um München. Klettergebiete, Felsen und Touren im Überblick.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Munichclimbs",
+    description: "Klettern rund um München. Klettergebiete, Felsen und Touren im Überblick.",
+    url: "/",
+  },
 }
+
+export const revalidate = 300
 
 type TopoLocation = {
   areaSlug: string
@@ -104,6 +112,10 @@ function rockMapSummaries(areasWithRoutes: Array<{ area: Area; routes: Awaited<R
   return [...summaries.values()]
 }
 
+function publishedRockCount(area: Area, rocks: Awaited<ReturnType<typeof fetchRocks>>): number {
+  return rocks.filter((rock) => referenceId(rock.area) === `/api/v1/areas/${area.id}`).length
+}
+
 export default async function Home() {
   const areas = await fetchAreas().catch((error) => {
     console.error("Failed to load areas:", error)
@@ -127,9 +139,37 @@ export default async function Home() {
   const bannedRockCardsData = bannedRockCards(bannedRocks, onlineAreas)
   const areaMapSummaries = mapSummaries(areasWithRoutes, rocks)
   const individualRockMapSummaries = rockMapSummaries(areasWithRoutes, rocks)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.munichclimbs.de"
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        url: `${siteUrl}/`,
+        name: "Munichclimbs",
+        inLanguage: "de-DE",
+      },
+      {
+        "@type": "ItemList",
+        name: "Klettergebiete um München",
+        itemListElement: onlineAreas.map((area, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: area.name,
+          url: new URL(`/${getAreaSlug(area)}`, siteUrl).toString(),
+        })),
+      },
+    ],
+  }
 
   return (
     <section className="home-page flex flex-col gap-6" aria-labelledby="index-page-heading">
+      <script
+        type="application/ld+json"
+        // JSON.stringify is safe here because this is application data, not HTML.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <div className="mb-3 flex items-center justify-between gap-3 py-3">
         <h1 id="index-page-heading" className="text-2xl font-medium leading-tight sm:text-3xl">
           Klettergebiete um München
@@ -140,7 +180,7 @@ export default async function Home() {
         <section className="min-w-0 lg:col-span-8" aria-label="Klettergebiete">
           <div className="flex flex-col gap-4">
             {areasWithRoutes.map(({ area, routes }, index) => (
-              <AreaCard key={area.id} area={area} routes={routes} priority={index === 0} />
+              <AreaCard key={area.id} area={area} routes={routes} rockCount={publishedRockCount(area, rocks)} priority={index === 0} />
             ))}
           </div>
         </section>

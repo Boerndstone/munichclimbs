@@ -1,9 +1,10 @@
 "use client"
 
-import { Fragment, useEffect, useState } from "react"
+import { Fragment, useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { LoaderCircle, Search } from "lucide-react"
 
+import { slugifyAreaName } from "@/lib/slugify"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -49,11 +50,11 @@ const modes: [Mode, string][] = [
 ]
 
 const attributeFilters = [
-  ["slab", "Platte"],
-  ["overhang", "Überhang"],
-  ["crack", "Riss"],
-  ["wall", "Wand"],
-  ["boulder", "Boulder"],
+  ["childFriendly", "Kinderfreundlich"],
+  ["sunny", "Sonnig"],
+  ["rainProtected", "Regenschutz"],
+  ["train", "Mit Bahn erreichbar"],
+  ["bike", "Bahn + Fahrrad"],
 ] as const
 
 function pageItems(current: number, total: number) {
@@ -61,6 +62,19 @@ function pageItems(current: number, total: number) {
   return [...values]
     .filter((value) => value >= 1 && value <= total)
     .sort((first, second) => first - second)
+}
+
+/** The legacy search endpoint returns Symfony's mixed-case URLs. Keep results
+ * inside Next's canonical URL space so search does not introduce duplicate URLs. */
+function canonicalResultHref(url: string) {
+  const parts = url.split("/").filter(Boolean)
+  if (parts.length === 0) return "/"
+
+  const area = slugifyAreaName(parts[0])
+  if (parts.length === 1) return `/${area}`
+
+  const rock = parts.slice(1).join("/").toLowerCase().replace(/_/g, "-")
+  return `/${area}/${rock}`
 }
 
 export function SearchModal({
@@ -76,9 +90,10 @@ export function SearchModal({
   const [attributes, setAttributes] = useState<string[]>([])
   const [data, setData] = useState<SearchData>({})
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
 
-  async function search(nextPage = page) {
+  const search = useCallback(async (nextPage = page) => {
     const params = new URLSearchParams({ mode })
 
     if (mode === "name" || mode === "firstascent") {
@@ -96,24 +111,32 @@ export function SearchModal({
     }
 
     setLoading(true)
+    setError(null)
     try {
       const response = await fetch(`/api/search?${params}`)
-      if (!response.ok) return
+      if (!response.ok) {
+        setData({})
+        setError("Die Suche konnte gerade nicht geladen werden. Bitte versuchen Sie es erneut.")
+        return
+      }
 
       const nextData = (await response.json()) as SearchData
       setData(nextData)
       setPage(nextData.page ?? nextPage)
+    } catch {
+      setData({})
+      setError("Die Suche konnte gerade nicht geladen werden. Bitte versuchen Sie es erneut.")
     } finally {
       setLoading(false)
     }
-  }
+  }, [area, attributes, grades, mode, page, query])
 
   useEffect(() => {
     if (mode !== "name" && mode !== "firstascent") return
 
     const timeout = setTimeout(() => void search(1), 250)
     return () => clearTimeout(timeout)
-  }, [query, mode])
+  }, [mode, query, search])
 
   const rocks = data.rocks ?? []
   const routes = data.routes ?? []
@@ -128,6 +151,7 @@ export function SearchModal({
     setMode(nextMode)
     setQuery("")
     setData({})
+    setError(null)
     setPage(1)
   }
 
@@ -157,7 +181,7 @@ export function SearchModal({
           {items.map((item, index) => (
             <li key={`${title}-${item.url}-${item.name}-${item.grade ?? ""}-${index}`}>
               <Link
-                href={item.url}
+                href={canonicalResultHref(item.url)}
                 onClick={() => setOpen(false)}
                 className="block px-3 py-2 text-sm hover:bg-accent"
               >
@@ -223,7 +247,9 @@ export function SearchModal({
 
           {(mode === "grade" || mode === "attributes") && (
             <div className="space-y-3">
+              <label className="sr-only" htmlFor="search-area">Gebiet eingrenzen</label>
               <select
+                id="search-area"
                 value={area}
                 onChange={(event) => setArea(event.target.value)}
                 className="flex h-9 w-full rounded-md border bg-background px-3 py-1 text-sm shadow-xs"
@@ -279,7 +305,15 @@ export function SearchModal({
             </div>
           )}
 
-          {loading ? (
+          <p className="sr-only" aria-live="polite">
+            {loading ? "Suche läuft" : error ?? `${results.length} Ergebnisse`}
+          </p>
+
+          {error ? (
+            <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+              {error}
+            </div>
+          ) : loading ? (
             <LoaderCircle className="m-6 size-5 animate-spin" />
           ) : results.length > 0 ? (
             <div className="mt-4">
@@ -333,6 +367,8 @@ export function SearchModal({
                 </Pagination>
               )}
             </div>
+          ) : (mode === "attributes" || mode === "grade") ? (
+            <p className="mt-4 text-sm text-muted-foreground">Wählen Sie mindestens einen Filter und starten Sie die Suche.</p>
           ) : null}
         </div>
       </DialogContent>

@@ -232,6 +232,19 @@ main:has(.area-page) > div {
   padding: 0;
 }
 
+/* Rock pages use the same full-bleed hero and sector rail as the existing
+   Symfony public frontend; the topo content itself stays on its narrower rail. */
+main:has(.rock-page) {
+  max-width: none;
+  padding: 50px 0 2rem;
+}
+
+main:has(.rock-page) > div {
+  max-width: none;
+  gap: 0;
+  padding: 0;
+}
+
 .areas-map .leaflet-control-attribution {
   font-size: 10px;
 }
