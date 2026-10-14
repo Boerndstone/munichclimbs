@@ -1,23 +1,30 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Chelsea_Market } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { SiteNavigation } from "@/components/site-navigation"
 import { SiteFooter } from "@/components/site-footer"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const inter = localFont({
+  variable: "--font-ui",
+  display: "swap",
+  src: [
+    { path: "./fonts/Inter-Regular.ttf", weight: "400", style: "normal" },
+    { path: "./fonts/Inter-Medium.ttf", weight: "500", style: "normal" },
+    { path: "./fonts/Inter-SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "./fonts/Inter-Bold.ttf", weight: "700", style: "normal" },
+  ],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const chelseaMarket = Chelsea_Market({
-  weight: "400",
-  variable: "--font-chelsea-market",
-  subsets: ["latin"],
+const chelseaMarket = localFont({
+  variable: "--font-munich-brand",
+  display: "swap",
+  src: [
+    {
+      path: "./fonts/ChelseaMarket-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+  ],
 });
 
 export const metadata: Metadata = {
@@ -39,9 +46,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="de">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${chelseaMarket.variable} flex min-h-svh flex-col antialiased`}
+        className={`${inter.variable} ${chelseaMarket.variable} flex min-h-svh flex-col antialiased`}
       >
         <SiteNavigation />
         <main className="mx-auto flex w-full max-w-[1024px] flex-1 flex-col px-4 pb-8 pt-[74px] text-[1.05rem] sm:text-[15px]">

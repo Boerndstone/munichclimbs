@@ -63,6 +63,8 @@ This means the work is a controlled parity migration and refinement—not a blan
 
 ### Phase 1 — Make the shared shell visually identical
 
+**Progress:** The shared visual foundation now uses the existing local Inter and Chelsea Market files, frontend theme and grade tokens, compact shadcn Card, Button, and Switch primitives, plus scoped `.typeset` content typography. No Twig templates or Stimulus controllers were copied.
+
 1. Port the Inter and Chelsea Market font files/licensing configuration into `public/fonts` or a suitable Next font setup.
 2. Align `app/globals.css` tokens with the current frontend’s `app.css` and `global.scss`: colours, radii, shadows, typography, dark theme, and the scoped `.typeset` treatment for long-form content.
 3. Finish the site header: home link, menu/sheet, search trigger, theme switch, language switch, settings controls, and focus handling.

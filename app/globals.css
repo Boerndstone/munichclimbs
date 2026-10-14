@@ -9,8 +9,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-ui);
+  --font-brand: var(--font-munich-brand);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -28,6 +29,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -50,6 +52,8 @@
 }
 
 :root {
+  --font-ui: ui-sans-serif, system-ui, sans-serif;
+  --font-munich-brand: system-ui, sans-serif;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -66,6 +70,7 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -82,16 +87,31 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --theme-bg: #ffffff;
+  --theme-bg-opacity: rgb(255 255 255 / 0.9);
+  --theme-bg-lighter: #ffffff;
+  --theme-text: #000000;
+  --theme-border: #1a1a1a;
+  --grade-bucket-3: #059669;
+  --grade-bucket-4: #16a34a;
+  --grade-bucket-5: #65a30d;
+  --grade-bucket-6: #d97706;
+  --grade-bucket-7: #ea580c;
+  --grade-bucket-8: #c2410c;
+  --grade-bucket-9: #dc2626;
+  --grade-bucket-10: #e11d48;
+  --grade-bucket-11: #4338ca;
+  --grade-project: #334155;
 }
 
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.145 0 0);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.145 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
+  --primary: oklch(0.985 0 0);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -99,23 +119,29 @@
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: oklch(0.145 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.985 0 0);
+  --sidebar-primary-foreground: oklch(0.205 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+  --theme-bg: #000000;
+  --theme-bg-opacity: rgb(0 0 0 / 0.2);
+  --theme-bg-lighter: #171717;
+  --theme-text: #ffffff;
+  --theme-border: #ffffff;
 }
 
 @layer base {
@@ -124,34 +150,73 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-ui);
   }
-  :root {
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+  html {
+    overflow-x: clip;
   }
- 
-  .dark {
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.439 0 0);
+
+  a[href]:not([aria-disabled="true"]),
+  summary,
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  input[type="submit"]:not(:disabled),
+  input[type="button"]:not(:disabled),
+  input[type="reset"]:not(:disabled),
+  input[type="image"]:not(:disabled) {
+    @apply cursor-pointer;
   }
 
   .chelsea-market-regular {
-    font-family: var(--font-chelsea-market), system-ui;
+    font-family: var(--font-munich-brand), system-ui;
     font-weight: 400;
     font-style: normal;
   }
+}
+
+@layer components {
+  .typeset {
+    --typeset-font-body: var(--font-ui);
+    --typeset-font-heading: var(--font-ui);
+    --typeset-size: 1rem;
+    --typeset-leading: 1.7;
+    --typeset-flow: 1.25em;
+    color: var(--foreground);
+    font-family: var(--typeset-font-body);
+    font-size: var(--typeset-size);
+    line-height: var(--typeset-leading);
+  }
+
+  .typeset :where(h1, h2, h3, h4, h5, h6) {
+    margin-block: 0;
+    color: var(--foreground);
+    font-family: var(--typeset-font-heading);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  .typeset :where(h1) { font-size: clamp(1.875rem, 4vw, 2.25rem); }
+  .typeset :where(h2) { font-size: clamp(1.5rem, 3vw, 1.875rem); }
+  .typeset :where(h3) { font-size: 1.25rem; }
+  .typeset :where(h4) { font-size: 1.125rem; }
+  .typeset :where(h5, h6) { font-size: 1rem; }
+  .typeset :where(p, ul, ol, blockquote, pre, table, figure, hr) { margin-block: var(--typeset-flow) 0; }
+  .typeset :where(ul, ol) { padding-inline-start: 1.5em; }
+  .typeset :where(ul) { list-style: disc; }
+  .typeset :where(ol) { list-style: decimal; }
+  .typeset :where(li + li) { margin-block-start: 0.35em; }
+  .typeset :where(a) { color: var(--primary); text-decoration: underline 1px; text-underline-offset: 0.18em; }
+  .typeset :where(strong, th) { font-weight: 600; }
+  .typeset :where(blockquote) { border-inline-start: 0.25rem solid var(--border); color: var(--muted-foreground); padding-inline-start: 1rem; }
+  .typeset :where(hr) { border: 0; border-top: 1px solid var(--border); }
+  .typeset :where(code) { border-radius: calc(var(--radius) - 2px); background: var(--muted); font-size: 0.875em; padding: 0.15em 0.35em; }
+  .typeset :where(pre) { overflow-x: auto; border-radius: var(--radius); background: var(--muted); padding: 1rem; }
+  .typeset :where(pre code) { background: transparent; padding: 0; }
+  .typeset :where(img) { height: auto; max-width: 100%; }
+  .typeset :where(table) { width: 100%; border-collapse: collapse; }
+  .typeset :where(th, td) { border-bottom: 1px solid var(--border); padding: 0.625rem 0.75rem; text-align: start; }
 }
 
 /* Area pages render their hero directly below the fixed navigation. This mirrors
