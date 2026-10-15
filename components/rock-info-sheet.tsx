@@ -5,15 +5,22 @@ import Image from "next/image"
 import {
   Info,
   AlertTriangle,
-  FileText,
-  HandHeart,
-  Images,
-  Leaf,
-  MapPinned,
-  Mountain,
-  Route,
-  ShieldAlert,
+  ArrowUp10,
+  BookText,
+  Camera,
+  ExternalLink,
+  Flower,
+  HandFist,
+  HardHat,
+  MapPin,
+  NotepadText,
+  PencilLine,
+  Signpost,
+  Skull,
   Star,
+  Trash2,
+  TriangleAlert,
+  TvMinimalPlay,
 } from "lucide-react"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -21,7 +28,7 @@ import { Button } from "@/components/ui/button"
 import { RouteGradeHistogram } from "@/components/route-grade-histogram"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import type { RouteSummary } from "@/lib/api"
-import type { PhotoSummary, VideoSummary } from "@/lib/api"
+import type { PublicPhoto, PublicVideo } from "@/types/public-content"
 import type { Rock } from "@/types/rock"
 import { galleryImageUrl } from "@/lib/media"
 
@@ -29,8 +36,8 @@ type Props = {
   rock: Rock
   railwayStation?: unknown
   routes: RouteSummary[]
-  photos: PhotoSummary[]
-  videos: VideoSummary[]
+  photos: PublicPhoto[]
+  videos: PublicVideo[]
 }
 
 type RailwayAccess = { stationName: string; minutes: number; mode: "walk" | "bike" }
@@ -156,7 +163,7 @@ export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: 
                     <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">Regenschutz:</td><td className="px-3 py-2"><BooleanValue value={rock.rain} label="Ja" /></td></tr>
                     {hasMap && <>
                       <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">GPS:</td><td className="px-3 py-2">{latitude}, {longitude}</td></tr>
-                      <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2 align-top">Auf Karte zeigen:</td><td className="px-3 py-2"><Link href={googleMapUrl!} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-2 hover:text-black/70">↗ Google Maps</Link><br /><Link href={mapUrl!} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-2 hover:text-black/70">↗ OpenStreetMap</Link></td></tr>
+                      <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2 align-top">Auf Karte zeigen:</td><td className="px-3 py-2"><Link href={googleMapUrl!} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline decoration-dotted underline-offset-2 hover:text-black/70"><ExternalLink className="size-4" aria-hidden="true" />Google Maps</Link><br /><Link href={mapUrl!} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline decoration-dotted underline-offset-2 hover:text-black/70"><ExternalLink className="size-4" aria-hidden="true" />OpenStreetMap</Link></td></tr>
                     </>}
                     {rock.season && <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">Saison:</td><td className="px-3 py-2">{rock.season}</td></tr>}
                     {rock.zone !== null && rock.zone !== undefined && <tr className="border-b border-[var(--theme-border)] odd:bg-[var(--theme-bg-lighter)]/50"><td className="px-3 py-2">Zone:</td><td className="px-3 py-2">{rock.zone}</td></tr>}
@@ -166,12 +173,12 @@ export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: 
             </AccordionItem>
 
             {description && <AccordionItem value="description">
-              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={FileText}>Beschreibung</SectionTitle></AccordionTrigger>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={BookText}>Beschreibung</SectionTitle></AccordionTrigger>
               <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p className="whitespace-pre-line leading-relaxed">{description}</p></AccordionContent>
             </AccordionItem>}
 
             {(access || accessEstimates.length > 0) && <AccordionItem value="access">
-              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Route}>Anfahrt &amp; Zustieg</SectionTitle></AccordionTrigger>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Signpost}>Anfahrt &amp; Zustieg</SectionTitle></AccordionTrigger>
               <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black">
                 {accessEstimates.length > 0 && <div className="mb-3 space-y-2">
                   {accessEstimates.map((estimate) => (
@@ -186,7 +193,7 @@ export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: 
             </AccordionItem>}
 
             <AccordionItem value="map">
-              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={MapPinned}>Karte</SectionTitle></AccordionTrigger>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={MapPin}>Karte</SectionTitle></AccordionTrigger>
               <AccordionContent className="border-t border-black text-black">
                 {hasMap && mapBounds && mapUrl && googleMapUrl ? <>
                   <iframe
@@ -204,17 +211,17 @@ export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: 
             </AccordionItem>
 
             {nature && <AccordionItem value="nature">
-              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={ShieldAlert}>Kletterregelung &amp; Naturschutz</SectionTitle></AccordionTrigger>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={TriangleAlert}>Kletterregelung &amp; Naturschutz</SectionTitle></AccordionTrigger>
               <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p className="whitespace-pre-line leading-relaxed">{nature}</p></AccordionContent>
             </AccordionItem>}
 
             {flowers && <AccordionItem value="flowers">
-              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Leaf}>Pflanzen</SectionTitle></AccordionTrigger>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Flower}>Pflanzen</SectionTitle></AccordionTrigger>
               <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p className="whitespace-pre-line leading-relaxed">{flowers}</p></AccordionContent>
             </AccordionItem>}
 
             <AccordionItem value="images">
-              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Images}>Bilder</SectionTitle></AccordionTrigger>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Camera}>Bilder</SectionTitle></AccordionTrigger>
               <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black">
                 {photos.length > 0 ? <div className="grid grid-cols-2 gap-2">
                   {photos.map((photo) => (
@@ -235,25 +242,29 @@ export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: 
             </AccordionItem>
 
             {videos.length > 0 && <AccordionItem value="videos">
-              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Images}>Videos</SectionTitle></AccordionTrigger>
-              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><ul className="space-y-2">{videos.filter((video) => video.videoLink).map((video) => <li key={video.id}><a className="underline decoration-dotted underline-offset-2" href={video.videoLink!} target="_blank" rel="noopener noreferrer">Video öffnen</a></li>)}</ul></AccordionContent>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={TvMinimalPlay}>Videos</SectionTitle></AccordionTrigger>
+              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><ul className="space-y-2">{videos.filter((video) => video.videoLink).map((video) => <li key={video.id}><a className="inline-flex items-center gap-1 underline decoration-dotted underline-offset-2" href={video.videoLink!} target="_blank" rel="noopener noreferrer"><TvMinimalPlay className="size-4" aria-hidden="true" />{video.videoRoutes?.name ? `Video: ${video.videoRoutes.name}` : "Video öffnen"}</a></li>)}</ul></AccordionContent>
             </AccordionItem>}
 
             <AccordionItem value="symbols">
-              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Mountain}>Zeichenerklärung</SectionTitle></AccordionTrigger>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={NotepadText}>Zeichenerklärung</SectionTitle></AccordionTrigger>
               <AccordionContent className="border-t border-black text-black">
                 <table className="w-full border-collapse text-sm [&>tbody>tr:last-child]:border-b-0"><tbody>
                   <tr className="border-b border-black"><td className="px-3 py-2"><Star className="size-4" /></td><td className="px-3 py-2">Empfehlenswerte Route</td></tr>
                   <tr className="border-b border-black"><td className="px-3 py-2"><span className="flex"><Star className="size-4" /><Star className="size-4" /></span></td><td className="px-3 py-2">Sehr empfehlenswerte Route</td></tr>
                   <tr className="border-b border-black"><td className="px-3 py-2"><span className="flex"><Star className="size-4" /><Star className="size-4" /><Star className="size-4" /></span></td><td className="px-3 py-2">Traumroute</td></tr>
-                  <tr className="border-b border-black"><td className="px-3 py-2"><AlertTriangle className="size-4" /></td><td className="px-3 py-2">Besondere Vorsicht bei der Absicherung</td></tr>
-                  <tr className="border-b border-black"><td className="px-3 py-2"><ShieldAlert className="size-4" /></td><td className="px-3 py-2">Sperrung oder wichtige Regelung beachten</td></tr>
+                  <tr className="border-b border-black"><td className="px-3 py-2"><Trash2 className="size-4" /></td><td className="px-3 py-2">Nicht empfehlenswerte Route</td></tr>
+                  <tr className="border-b border-black"><td className="px-3 py-2"><AlertTriangle className="size-4 text-red-700" /></td><td className="px-3 py-2">Besondere Vorsicht bei der Absicherung</td></tr>
+                  <tr className="border-b border-black"><td className="px-3 py-2"><Skull className="size-4" /></td><td className="px-3 py-2">Gefährliche Absicherung</td></tr>
+                  <tr className="border-b border-black"><td className="px-3 py-2"><HardHat className="size-4" /></td><td className="px-3 py-2">Felsqualität beachten</td></tr>
+                  <tr className="border-b border-black"><td className="px-3 py-2"><ArrowUp10 className="size-4" /></td><td className="px-3 py-2">Mehrseillängentour</td></tr>
+                  <tr className="border-b border-black"><td className="px-3 py-2"><HandFist className="size-4" /></td><td className="px-3 py-2">Rissklettern</td></tr>
                 </tbody></table>
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="help">
-              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={HandHeart}>Mithelfen</SectionTitle></AccordionTrigger>
+              <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={PencilLine}>Mithelfen</SectionTitle></AccordionTrigger>
               <AccordionContent className="border-t border-black px-3 pb-4 pt-2 text-black">
                 <p className="leading-relaxed">Kennst du neue Routen, Änderungen oder wichtige Hinweise zu diesem Fels? Schreib uns, damit die Informationen aktuell bleiben.</p>
                 <Button asChild variant="outline" size="sm" className="mt-3"><a href="mailto:admin@munichclimbs.de">Information senden</a></Button>

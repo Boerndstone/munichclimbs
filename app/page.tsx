@@ -120,10 +120,7 @@ function publishedRockCount(area: Area, rocks: Awaited<ReturnType<typeof fetchRo
 }
 
 export default async function Home({ locale = "de" }: { locale?: "de" | "en" }) {
-  const areas = await fetchAreas().catch((error) => {
-    console.error("Failed to load areas:", error)
-    return []
-  })
+  const areas = await fetchAreas()
   const onlineAreas = areas.filter((area) => Number(area.online) === 1)
   const [areasWithRoutes, latestTopo, latestRoutes, bannedRocks, rocks] = await Promise.all([
     Promise.all(
@@ -184,9 +181,15 @@ export default async function Home({ locale = "de" }: { locale?: "de" | "en" }) 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
         <section className="min-w-0 lg:col-span-8" aria-label="Klettergebiete">
           <div className="flex flex-col gap-4">
-            {areasWithRoutes.map(({ area, routes }, index) => (
-              <AreaCard key={area.id} area={area} routes={routes} rockCount={publishedRockCount(area, rocks)} priority={index === 0} />
-            ))}
+            {areasWithRoutes.length > 0 ? (
+              areasWithRoutes.map(({ area, routes }, index) => (
+                <AreaCard key={area.id} area={area} routes={routes} rockCount={publishedRockCount(area, rocks)} priority={index === 0} />
+              ))
+            ) : (
+              <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                Derzeit sind keine Klettergebiete veröffentlicht.
+              </p>
+            )}
           </div>
         </section>
         <aside className="grid min-w-0 auto-rows-auto grid-cols-1 items-start gap-6 self-start lg:col-span-4" aria-label="Neueste Topos">

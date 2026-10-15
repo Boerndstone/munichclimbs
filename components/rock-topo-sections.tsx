@@ -1,11 +1,30 @@
 import Image from "next/image"
+import { Info } from "lucide-react"
 
-import type { CommentSummary, RouteSummary, TopoSummary } from "@/lib/api"
+import type { RouteSummary, TopoSummary } from "@/lib/api"
+import type { PublicComment } from "@/types/public-content"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogCloseButton,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { topoImageUrl } from "@/lib/media"
 
-function routeId(comment: CommentSummary): number | undefined {
+function routeId(comment: PublicComment): number | undefined {
   return typeof comment.route?.id === "number" ? comment.route.id : undefined
+}
+
+function commentDate(comment: PublicComment): string | null {
+  const value = comment.datetime ?? comment.createdAt
+  if (!value) return null
+
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : new Intl.DateTimeFormat("de-DE").format(date)
 }
 
 type TopoPath = { d: string; color: string; dot: boolean; dashed: boolean; startX: number; startY: number }
@@ -76,7 +95,7 @@ function topoPathEndpoint(d: string): [number, number] | undefined {
   return Number.isFinite(x) && Number.isFinite(y) ? [x, y] : undefined
 }
 
-function RouteTable({ routes, comments }: { routes: RouteSummary[]; comments: CommentSummary[] }) {
+function RouteTable({ routes, comments }: { routes: RouteSummary[]; comments: PublicComment[] }) {
   if (!routes.length) {
     return <p className="p-4 text-sm text-muted-foreground">Für diesen Bereich sind noch keine Routen veröffentlicht.</p>
   }
@@ -99,19 +118,62 @@ function RouteTable({ routes, comments }: { routes: RouteSummary[]; comments: Co
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">{route.grade ?? "–"}</td>
                   <td className="hidden px-3 py-2 lg:table-cell">{route.firstAscent}{route.yearFirstAscent ? ` (${route.yearFirstAscent})` : ""}</td>
+                  <td className="w-11 px-2 py-1 align-middle lg:w-12">
+                    {routeComments.length > 0 && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            className="rounded-full"
+                            aria-label={`Kommentare zu ${route.name} öffnen`}
+                          >
+                            <Info className="size-4" aria-hidden="true" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-h-[calc(100dvh-2rem)] max-w-lg">
+                          <header className="flex shrink-0 items-start justify-between gap-3 border-b px-4 py-3 pr-12 text-left">
+                            <div className="min-w-0">
+                              <DialogTitle className="text-left">
+                                {route.name}{route.grade ? ` (${route.grade})` : ""}
+                              </DialogTitle>
+                              {Boolean(route.firstAscent || route.yearFirstAscent) && (
+                                <DialogDescription className="mt-1 text-left">
+                                  Erstbegehung: {route.firstAscent}{route.yearFirstAscent ? ` ${route.yearFirstAscent}` : ""}
+                                </DialogDescription>
+                              )}
+                              {!route.firstAscent && !route.yearFirstAscent && (
+                                <DialogDescription className="sr-only">
+                                  Kommentare zur Route {route.name}
+                                </DialogDescription>
+                              )}
+                            </div>
+                            <DialogCloseButton />
+                          </header>
+                          <div className="min-h-0 overflow-y-auto px-4 text-left text-sm">
+                            {routeComments.map((comment, commentIndex) => {
+                              const date = commentDate(comment)
+                              return (
+                                <article
+                                  key={comment.id}
+                                  className={commentIndex > 0 ? "border-t border-border py-3" : "py-3"}
+                                >
+                                  <p className="whitespace-pre-line font-normal">
+                                    {comment.comment.replace(/<[^>]*>/g, "")}
+                                  </p>
+                                  <p className="mt-2 text-xs italic text-muted-foreground">
+                                    {comment.user?.username ?? "Anonym"}{date ? ` · ${date}` : ""}
+                                  </p>
+                                </article>
+                              )
+                            })}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </td>
                 </tr>
-                {routeComments.length > 0 && (
-                  <tr>
-                    <td colSpan={4} className="px-3 pb-2">
-                      <details className="text-sm">
-                        <summary className="cursor-pointer text-muted-foreground hover:text-foreground">{routeComments.length} {routeComments.length === 1 ? "Kommentar" : "Kommentare"}</summary>
-                        <div className="mt-2 space-y-3 border-l-2 border-border pl-3">
-                          {routeComments.map((comment) => <div key={comment.id}><p className="whitespace-pre-line font-normal">{comment.comment.replace(/<[^>]*>/g, "")}</p><p className="mt-1 text-xs italic text-muted-foreground">{comment.user?.username ?? "Anonym"}{comment.datetime ? ` · ${new Intl.DateTimeFormat("de-DE").format(new Date(comment.datetime))}` : ""}</p></div>)}
-                        </div>
-                      </details>
-                    </td>
-                  </tr>
-                )}
               </tbody>
             )
           })}
@@ -121,7 +183,7 @@ function RouteTable({ routes, comments }: { routes: RouteSummary[]; comments: Co
   )
 }
 
-export function RockTopoSections({ topos, routes, comments }: { topos: TopoSummary[]; routes: RouteSummary[]; comments: CommentSummary[] }) {
+export function RockTopoSections({ topos, routes, comments }: { topos: TopoSummary[]; routes: RouteSummary[]; comments: PublicComment[] }) {
   const orderedTopos = [...topos].sort((left, right) => (left.number ?? 0) - (right.number ?? 0))
   const assignedTopoNumbers = new Set(orderedTopos.map((topo) => topo.number).filter((number): number is number => number !== null && number !== undefined))
   const otherRoutes = routes.filter((route) => route.topoId === null || route.topoId === undefined || !assignedTopoNumbers.has(route.topoId))
