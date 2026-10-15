@@ -16,6 +16,7 @@ import {
 import { getAreaSlug } from "@/lib/slugify"
 import type { Area } from "@/types/area"
 import type { Metadata } from "next"
+import { connection } from "next/server"
 import { localizedAlternates } from "@/lib/seo"
 
 export const metadata: Metadata = {
@@ -120,6 +121,10 @@ function publishedRockCount(area: Area, rocks: Awaited<ReturnType<typeof fetchRo
 }
 
 export default async function Home({ locale = "de" }: { locale?: "de" | "en" }) {
+  // The public API is runtime infrastructure. Do not make `next build` wait on
+  // it; each loader below still uses Next's tagged, five-minute data cache.
+  await connection()
+
   const areas = await fetchAreas()
   const onlineAreas = areas.filter((area) => Number(area.online) === 1)
   const [areasWithRoutes, latestTopo, latestRoutes, bannedRocks, rocks] = await Promise.all([
