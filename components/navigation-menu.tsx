@@ -11,12 +11,6 @@ import { getAreaSlug } from "@/lib/slugify"
 import type { Area } from "@/types/area"
 import { SearchModal } from "@/components/search-modal"
 
-type NavigationRock = {
-  id?: string | number
-  name?: string
-  slug?: string
-}
-
 function isOnline(area: Area) {
   return Number(area.online) === 1
 }
@@ -25,7 +19,7 @@ function NavigationArea({ area }: { area: Area }) {
   const pathname = usePathname()
   const areaSlug = getAreaSlug(area)
   const areaPath = `/${areaSlug}`
-  const rocks = Array.isArray(area.rocks) ? (area.rocks as NavigationRock[]) : []
+  const rocks = area.rocks ?? []
   const isCurrentArea = pathname === areaPath || pathname.startsWith(`${areaPath}/`)
   const [isOpen, setIsOpen] = useState(isCurrentArea)
 

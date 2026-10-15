@@ -3,6 +3,7 @@ import "server-only"
 import type { Area, AreasResponse } from "@/types/area"
 import type { ApiReference, PublicComment, PublicPhoto, PublicVideo } from "@/types/public-content"
 import type { Rock } from "@/types/rock"
+import type { Route } from "@/types/route"
 import { getAreaSlug, slugifyAreaName } from "@/lib/slugify"
 
 const API_BASE_URL = process.env.MUNICHCLIMBS_API_URL ?? (
@@ -83,28 +84,10 @@ export async function fetchRocks(): Promise<Rock[]> {
   }))
 }
 
-/** API area item with rocks as returned from /api/areas (hydra) */
-export interface AreaWithRocks extends Area {
-  rocks?: Array<{ "@id": string; name: string; slug?: string; routeCount?: number }>
-  [key: string]: unknown
-}
+/** API area item with rocks as returned from /api/areas/{id}. */
+export type AreaWithRocks = Area
 
-export interface RouteSummary {
-  id: number
-  name?: string
-  nr?: number | null
-  grade?: string | null
-  gradeNo?: number | null
-  scale?: string | null
-  firstAscent?: string | null
-  yearFirstAscent?: number | null
-  rating?: number | null
-  protection?: number | null
-  rockQuality?: boolean | null
-  climbingStyle?: string[] | null
-  topoId?: number | null
-  rock?: { "@id"?: string; id?: number; name?: string } | string
-}
+export type { Route as RouteSummary } from "@/types/route"
 
 export interface TopoSummary {
   id: number
@@ -279,8 +262,8 @@ export async function fetchRocksForArea(areaId: string | number): Promise<Rock[]
 }
 
 /** Fetches all published routes for an area so the rock list can show grade distributions. */
-export async function fetchRoutesForArea(areaId: string | number): Promise<RouteSummary[]> {
-  return fetchHydraCollection<RouteSummary>(
+export async function fetchRoutesForArea(areaId: string | number): Promise<Route[]> {
+  return fetchHydraCollection<Route>(
     `/routes?area.id=${encodeURIComponent(String(areaId))}&itemsPerPage=100`,
     ["routes", `area-${areaId}`]
   )

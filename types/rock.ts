@@ -1,7 +1,15 @@
+import type { Coordinate } from "@/types/area"
+import type { ApiReference } from "@/types/public-content"
+
+export type PathCoordinate =
+  | { type: "Point"; coordinates: [number, number] }
+  | { type: "LineString"; coordinates: Array<[number, number]> }
+
 export interface Rock {
   id: string | number
   "@id"?: string
-  area?: string | { id?: string | number; "@id"?: string; name?: string; slug?: string }
+  "@type"?: string
+  area?: string | ApiReference | null
   name: string
   slug?: string
   url?: string
@@ -16,8 +24,12 @@ export interface Rock {
   orientation?: string | null
   season?: string | null
   zone?: string | number | null
-  lat?: string | number | null
-  lng?: string | number | null
+  lat?: Coordinate | null
+  lng?: Coordinate | null
+  zoom?: number | null
+  nr?: number | null
+  banned?: number | null
+  pathCoordinates?: PathCoordinate[] | null
   description?: string | null
   rockDescription?: string | null
   access?: string | null
@@ -26,13 +38,11 @@ export interface Rock {
   rockNature?: string | null
   flowers?: string | null
   rockFlowers?: string | null
-  online?: boolean | number
-  [key: string]: unknown // Allow for additional properties from API
+  online?: boolean | number | null
 }
 
 export interface RocksResponse {
   rocks?: Rock[]
   data?: Rock[]
   'hydra:member'?: Rock[] // API Platform Hydra format
-  [key: string]: unknown // Allow for additional properties from API
 }

@@ -1,4 +1,32 @@
+import type { ApiReference } from "@/types/public-content"
+
+export type Coordinate = string | number
+
+export interface RailwayStation {
+  name?: string | null
+  lat?: Coordinate | null
+  lng?: Coordinate | null
+}
+
+export interface RailwayStationGroup {
+  trainStations?: RailwayStation[]
+}
+
+export type RailwayStationData = RailwayStation | RailwayStationGroup | RailwayStation[]
+
+export interface AreaRock {
+  "@id"?: string
+  "@type"?: string
+  id?: string | number
+  name: string
+  slug?: string
+  url?: string
+  routeCount?: number
+}
+
 export interface Area {
+  "@id"?: string
+  "@type"?: string
   id: string | number
   name: string
   slug?: string
@@ -6,10 +34,17 @@ export interface Area {
   image?: string
   headerImage?: string | null
   orientation?: string | null
-  lat?: string | number | null
-  lng?: string | number | null
-  online?: number
-  [key: string]: unknown // Allow for additional properties from API
+  lat?: Coordinate | null
+  lng?: Coordinate | null
+  zoom?: number | null
+  online?: boolean | number | null
+  sequence?: number | null
+  rocks?: AreaRock[]
+  routes?: Array<string | ApiReference>
+  travelTimeMinutes?: number | null
+  rockResponsibility?: string | null
+  railwayStation?: RailwayStationData | null
+  kletterkonzeption?: string | null
 }
 
 export interface AreasResponse {
@@ -19,6 +54,4 @@ export interface AreasResponse {
   '@context'?: string
   '@id'?: string
   '@type'?: string
-  // Support different response formats
-  [key: string]: unknown
 }

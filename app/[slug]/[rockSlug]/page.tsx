@@ -16,6 +16,7 @@ import {
 import { RockInfoSheet } from "@/components/rock-info-sheet"
 import { RockTopoSections } from "@/components/rock-topo-sections"
 import type { Rock } from "@/types/rock"
+import type { ApiReference } from "@/types/public-content"
 import type { Metadata } from "next"
 import { headerImageUrl } from "@/lib/media"
 import { localizedAlternates } from "@/lib/seo"
@@ -36,7 +37,7 @@ function rockMatchesSlug(rock: Rock, rockSlug: string) {
   return slug === normalized || String(rock.id) === rockSlug || extractId(iri) === rockSlug
 }
 
-function routeRockId(route: { rock?: { "@id"?: string; id?: number; name?: string } | string }) {
+function routeRockId(route: { rock?: ApiReference | string | null }) {
   if (typeof route.rock === "string") return extractId(route.rock)
   return route.rock?.id?.toString() ?? extractId(route.rock?.["@id"] ?? "")
 }

@@ -41,9 +41,7 @@ type TopoLocation = {
   rockName: string
 }
 
-type AreaRock = { "@id"?: string; name?: string; slug?: string }
-
-function referenceId(reference: unknown): string | undefined {
+function referenceId(reference: string | { "@id"?: string } | null | undefined): string | undefined {
   if (typeof reference === "string") return reference
   if (reference && typeof reference === "object" && "@id" in reference && typeof reference["@id"] === "string") return reference["@id"]
   return undefined
@@ -54,7 +52,7 @@ function findRockLocation(rockReference: string | { "@id"?: string } | undefined
   if (!rockId) return undefined
 
   for (const area of areas) {
-    const rocks = Array.isArray(area.rocks) ? area.rocks as AreaRock[] : []
+    const rocks = area.rocks ?? []
     const rock = rocks.find((candidate) => candidate["@id"] === rockId)
     if (rock?.slug) {
       return { areaSlug: getAreaSlug(area), areaName: area.name, rockSlug: rock.slug, rockName: rock.name ?? "" }

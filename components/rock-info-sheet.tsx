@@ -42,9 +42,8 @@ type Props = {
 
 type RailwayAccess = { stationName: string; minutes: number; mode: "walk" | "bike" }
 
-function textFrom(rock: Rock, keys: string[]) {
-  for (const key of keys) {
-    const value = rock[key]
+function textFrom(...values: Array<string | null | undefined>) {
+  for (const value of values) {
     if (typeof value === "string" && value.trim()) {
       return value
         .replace(/<\/p>\s*<p>/gi, "\n\n")
@@ -117,10 +116,10 @@ function BooleanValue({ value, label }: { value: boolean | null | undefined; lab
 }
 
 export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: Props) {
-  const description = textFrom(rock, ["description", "rockDescription"])
-  const access = textFrom(rock, ["access", "rockAccess"])
-  const nature = textFrom(rock, ["nature", "rockNature"])
-  const flowers = textFrom(rock, ["flowers", "rockFlowers"])
+  const description = textFrom(rock.description, rock.rockDescription)
+  const access = textFrom(rock.access, rock.rockAccess)
+  const nature = textFrom(rock.nature, rock.rockNature)
+  const flowers = textFrom(rock.flowers, rock.rockFlowers)
   const latitude = coordinate(rock.lat)
   const longitude = coordinate(rock.lng)
   const hasMap = latitude !== null && longitude !== null
