@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { connection } from "next/server"
 
 import { AreaCard } from "@/components/area-card"
@@ -24,14 +25,30 @@ function description(locale: HomeLocale, names: string[]) {
 
 export async function generateMetadata(): Promise<Metadata> {
   await connection()
-  const { areas } = await fetchHomeData()
-  const pageDescription = description("de", areas.map((area) => area.name))
+  let pageDescription = "Klettern rund um München. Klettergebiete, Felsen und Touren im Überblick."
+  try {
+    const { areas } = await fetchHomeData()
+    pageDescription = description("de", areas.map((area) => area.name))
+  } catch {
+    // Metadata must not turn a temporary API outage into a 500 response.
+  }
   return { title: { absolute: "Munichclimbs" }, description: pageDescription, alternates: localizedAlternates("/"), robots: { index: true, follow: true }, openGraph: { title: "Munichclimbs", description: pageDescription, url: "/", locale: "de_DE", alternateLocale: "en_US" } }
+}
+
+function HomeUnavailable({ locale }: { locale: HomeLocale }) {
+  const english = locale === "en"
+  return <section className="flex min-h-[50vh] flex-col items-start justify-center gap-4" aria-labelledby="home-unavailable-heading"><p className="text-sm font-medium text-muted-foreground">{english ? "Temporarily unavailable" : "Vorübergehend nicht verfügbar"}</p><h1 id="home-unavailable-heading" className="text-3xl font-semibold tracking-tight">{english ? "Climbing data could not be loaded" : "Die Kletterdaten konnten nicht geladen werden"}</h1><p className="max-w-prose text-muted-foreground">{english ? "Please try again in a moment." : "Bitte versuchen Sie es in einem Moment erneut."}</p><Link href={localizedPath("/", locale)} className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">{english ? "Try again" : "Erneut versuchen"}</Link></section>
 }
 
 export default async function Home({ locale = "de" }: { locale?: HomeLocale }) {
   await connection()
-  const [home, latestTopo] = await Promise.all([fetchHomeData(), fetchLatestTopo()])
+  let home: Awaited<ReturnType<typeof fetchHomeData>>
+  let latestTopo: TopoSummary | null
+  try {
+    [home, latestTopo] = await Promise.all([fetchHomeData(), fetchLatestTopo()])
+  } catch {
+    return <HomeUnavailable locale={locale} />
+  }
   const labels = homeCopy(locale)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.munichclimbs.de"
   const pageDescription = description(locale, home.areas.map((area) => area.name))

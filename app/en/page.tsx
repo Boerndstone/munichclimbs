@@ -9,8 +9,13 @@ export const revalidate = 300
 
 export async function generateMetadata(): Promise<Metadata> {
   await connection()
-  const { areas } = await fetchHomeData()
-  const description = `Climbing areas around Munich: ${areas.map((area) => area.name).join(", ")}.`
+  let description = "Climbing around Munich. Climbing areas, crags and routes at a glance."
+  try {
+    const { areas } = await fetchHomeData()
+    description = `Climbing areas around Munich: ${areas.map((area) => area.name).join(", ")}.`
+  } catch {
+    // The page renders its own intentional unavailable state during an outage.
+  }
   return { title: { absolute: "Munichclimbs" }, description, alternates: { ...localizedAlternates("/"), canonical: englishCanonicalPath("/") }, robots: { index: true, follow: true }, openGraph: { title: "Munichclimbs", description, url: englishCanonicalPath("/"), locale: "en_US", alternateLocale: "de_DE" } }
 }
 
