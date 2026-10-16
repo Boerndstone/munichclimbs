@@ -1,0 +1,10 @@
+import Link from "next/link"
+import { Star, TriangleAlert } from "lucide-react"
+
+import { homeCopy, localizedPath, type HomeLocale } from "@/lib/home-copy"
+import type { LatestRoutesPageRoute } from "@/types/home"
+
+export function LatestRoutesPage({ routes, locale }: { routes: LatestRoutesPageRoute[]; locale: HomeLocale }) {
+  const labels = homeCopy(locale)
+  return <section aria-labelledby="latest-routes-page-heading"><div className="mb-3 flex items-center justify-between py-3"><h1 id="latest-routes-page-heading" className="text-3xl font-medium leading-tight">{labels.latestRoutesPage}</h1></div><div className="w-full overflow-x-auto"><table className="min-w-[720px] w-full text-left text-sm font-medium"><thead><tr><th scope="col" className="px-3 py-2">#</th><th scope="col" className="px-3 py-2">{labels.route}</th><th scope="col" className="px-3 py-2">{labels.grade}</th><th scope="col" className="px-3 py-2">{labels.firstAscent}</th><th scope="col" className="px-3 py-2">{labels.rock}</th></tr></thead><tbody className="divide-y divide-border">{routes.map((route, index) => <tr key={route.id} className="odd:bg-muted/50 hover:bg-muted"><td className="px-3 py-2">{index + 1}</td><td className="px-3 py-2"><Link href={localizedPath(`/${route.areaSlug}/${route.rockSlug}`, locale)} className="text-sky-800 hover:underline dark:text-sky-400">{route.name}</Link>{route.rating && route.rating > 0 ? <span className="ml-1 inline-flex" aria-label={`${route.rating} of 3 stars`}>{Array.from({ length: Math.min(3, route.rating) }, (_, star) => <Star key={star} className="size-3 fill-amber-600 text-amber-600 dark:fill-amber-400 dark:text-amber-400" aria-hidden="true" />)}</span> : null}{route.protection && route.protection > 1 ? <TriangleAlert className="ml-1 inline size-3 text-red-700 dark:text-red-500" aria-label="Protection warning" /> : null}</td><td className="px-3 py-2">{route.grade}</td><td className="px-3 py-2">{route.firstAscent} {route.yearFirstAscent}</td><td className="px-3 py-2">{route.rockName}</td></tr>)}</tbody></table></div></section>
+}

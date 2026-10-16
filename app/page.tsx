@@ -1,207 +1,50 @@
-import { AreaCard } from "@/components/area-card"
-import { BannedRocksCard, LatestRoutesCard, SupportProjectCard, type SidebarBannedRock, type SidebarRoute } from "@/components/home-sidebar-cards"
-import { LatestTopoCard } from "@/components/latest-topo-card"
-import { AreasMapDialog, type AreaMapSummary, type RockMapSummary } from "@/components/areas-map-dialog"
-import {
-  fetchAreas,
-  fetchBannedRocks,
-  fetchLatestRoutes,
-  fetchLatestTopo,
-  fetchRocks,
-  fetchRoutesForArea,
-  type BannedRockSummary,
-  type LatestRouteSummary,
-  type TopoSummary,
-} from "@/lib/api"
-import { getAreaSlug } from "@/lib/slugify"
-import type { Area } from "@/types/area"
 import type { Metadata } from "next"
 import { connection } from "next/server"
-import { localizedAlternates } from "@/lib/seo"
 
-export const metadata: Metadata = {
-  title: { absolute: "Munichclimbs" },
-  description: "Klettern rund um München. Klettergebiete, Felsen und Touren im Überblick.",
-  alternates: localizedAlternates("/"),
-  openGraph: {
-    title: "Munichclimbs",
-    description: "Klettern rund um München. Klettergebiete, Felsen und Touren im Überblick.",
-    url: "/",
-    locale: "de_DE",
-    alternateLocale: "en_US",
-  },
-}
+import { AreaCard } from "@/components/area-card"
+import { AreasMapDialog } from "@/components/areas-map-dialog"
+import { BannedRocksCard, LatestRoutesCard, SupportProjectCard } from "@/components/home-sidebar-cards"
+import { LatestTopoCard } from "@/components/latest-topo-card"
+import { fetchHomeData, fetchLatestTopo, type TopoSummary } from "@/lib/api"
+import { homeCopy, localizedPath, type HomeLocale } from "@/lib/home-copy"
+import { localizedAlternates } from "@/lib/seo"
+import type { HomeRock } from "@/types/home"
 
 export const revalidate = 300
 
-type TopoLocation = {
-  areaSlug: string
-  areaName: string
-  rockSlug: string
-  rockName: string
+function referenceId(reference: string | { "@id"?: string } | null | undefined) { return typeof reference === "string" ? reference.split("/").filter(Boolean).at(-1) : reference?.["@id"]?.split("/").filter(Boolean).at(-1) }
+function topoLocation(topo: TopoSummary | null, rocks: HomeRock[]) {
+  const id = referenceId(topo?.rocks)
+  return id ? rocks.find((rock) => String(rock.rockId) === id) : undefined
 }
 
-function referenceId(reference: string | { "@id"?: string } | null | undefined): string | undefined {
-  if (typeof reference === "string") return reference
-  if (reference && typeof reference === "object" && "@id" in reference && typeof reference["@id"] === "string") return reference["@id"]
-  return undefined
+function description(locale: HomeLocale, names: string[]) {
+  return locale === "en" ? `Climbing areas around Munich: ${names.join(", ")}.` : `Klettergebiete rund um München: ${names.join(", ")}.`
 }
 
-function findRockLocation(rockReference: string | { "@id"?: string } | undefined, areas: Area[]): TopoLocation | undefined {
-  const rockId = referenceId(rockReference)
-  if (!rockId) return undefined
-
-  for (const area of areas) {
-    const rocks = area.rocks ?? []
-    const rock = rocks.find((candidate) => candidate["@id"] === rockId)
-    if (rock?.slug) {
-      return { areaSlug: getAreaSlug(area), areaName: area.name, rockSlug: rock.slug, rockName: rock.name ?? "" }
-    }
-  }
-
-  return undefined
-}
-
-function findTopoLocation(topo: TopoSummary | null, areas: Area[]): TopoLocation | undefined {
-  if (!topo) return undefined
-  return findRockLocation(topo.rocks, areas)
-}
-
-function latestRouteCards(routes: LatestRouteSummary[], areas: Area[]): SidebarRoute[] {
-  return routes.flatMap((route) => {
-    const location = findRockLocation(route.rock, areas)
-    if (!location) return []
-    return [{ id: route.id, name: route.name, grade: route.grade, rockName: location.rockName, href: `/${location.areaSlug}/${location.rockSlug}` }]
-  })
-}
-
-function bannedRockCards(rocks: BannedRockSummary[], areas: Area[]): SidebarBannedRock[] {
-  return rocks.flatMap((rock) => {
-    const areaId = referenceId(rock.area)
-    const area = areas.find((candidate) => `/api/v1/areas/${candidate.id}` === areaId)
-    if (!area || !rock.slug) return []
-    return [{ id: rock.id, name: rock.name, areaName: area.name, banned: rock.banned, href: `/${getAreaSlug(area)}/${rock.slug}` }]
-  })
-}
-
-function gradeChartIndex(route: { grade?: string | null; gradeNo?: number | null }) {
-  const grade = route.grade?.trim().toUpperCase()
-  if (!grade || route.gradeNo === null || route.gradeNo === 0) return 9
-  const number = Number(grade.match(/\d+/)?.[0])
-  if (!number) return 9
-  return grade.startsWith("FB") ? Math.min(8, Math.max(2, number + 2)) : Math.min(8, Math.max(0, number - 3))
-}
-
-function mapSummaries(areasWithRoutes: Array<{ area: Area; routes: Awaited<ReturnType<typeof fetchRoutesForArea>> }>, rocks: Awaited<ReturnType<typeof fetchRocks>>): AreaMapSummary[] {
-  return areasWithRoutes.map(({ area, routes }) => {
-    const gradeCounts = Array.from({ length: 10 }, () => 0)
-    routes.forEach((route) => { gradeCounts[gradeChartIndex(route)] += 1 })
-    return { id: area.id, routeCount: routes.length, rockCount: rocks.filter((rock) => referenceId(rock.area) === `/api/v1/areas/${area.id}`).length, gradeCounts }
-  })
-}
-
-function rockMapSummaries(areasWithRoutes: Array<{ area: Area; routes: Awaited<ReturnType<typeof fetchRoutesForArea>> }>, rocks: Awaited<ReturnType<typeof fetchRocks>>): RockMapSummary[] {
-  const summaries = new Map<string, RockMapSummary>(rocks.map((rock) => [String(rock.id), { id: rock.id, routeCount: 0, gradeCounts: Array.from({ length: 10 }, () => 0) }]))
-  for (const { routes } of areasWithRoutes) {
-    for (const route of routes) {
-      const rockId = referenceId(route.rock)?.split("/").filter(Boolean).at(-1)
-      const summary = rockId ? summaries.get(rockId) : undefined
-      if (!summary) continue
-      summary.routeCount += 1
-      summary.gradeCounts[gradeChartIndex(route)] += 1
-    }
-  }
-  return [...summaries.values()]
-}
-
-function publishedRockCount(area: Area, rocks: Awaited<ReturnType<typeof fetchRocks>>): number {
-  return rocks.filter((rock) => referenceId(rock.area) === `/api/v1/areas/${area.id}`).length
-}
-
-export default async function Home({ locale = "de" }: { locale?: "de" | "en" }) {
-  // The public API is runtime infrastructure. Do not make `next build` wait on
-  // it; each loader below still uses Next's tagged, five-minute data cache.
+export async function generateMetadata(): Promise<Metadata> {
   await connection()
+  const { areas } = await fetchHomeData()
+  const pageDescription = description("de", areas.map((area) => area.name))
+  return { title: { absolute: "Munichclimbs" }, description: pageDescription, alternates: localizedAlternates("/"), robots: { index: true, follow: true }, openGraph: { title: "Munichclimbs", description: pageDescription, url: "/", locale: "de_DE", alternateLocale: "en_US" } }
+}
 
-  const areas = await fetchAreas()
-  const onlineAreas = areas.filter((area) => Number(area.online) === 1)
-  const [areasWithRoutes, latestTopo, latestRoutes, bannedRocks, rocks] = await Promise.all([
-    Promise.all(
-      onlineAreas.map(async (area) => ({
-        area,
-        routes: await fetchRoutesForArea(area.id),
-      }))
-    ),
-    fetchLatestTopo(),
-    fetchLatestRoutes(),
-    fetchBannedRocks(),
-    fetchRocks(),
-  ])
-  const latestTopoLocation = findTopoLocation(latestTopo, onlineAreas)
-  const latestRouteCardsData = latestRouteCards(latestRoutes, onlineAreas)
-  const bannedRockCardsData = bannedRockCards(bannedRocks, onlineAreas)
-  const areaMapSummaries = mapSummaries(areasWithRoutes, rocks)
-  const individualRockMapSummaries = rockMapSummaries(areasWithRoutes, rocks)
+export default async function Home({ locale = "de" }: { locale?: HomeLocale }) {
+  await connection()
+  const [home, latestTopo] = await Promise.all([fetchHomeData(), fetchLatestTopo()])
+  const labels = homeCopy(locale)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.munichclimbs.de"
-  const isEnglish = locale === "en"
-  const localizedHomeUrl = new URL(isEnglish ? "/en" : "/", siteUrl).toString()
+  const pageDescription = description(locale, home.areas.map((area) => area.name))
+  const homeUrl = new URL(localizedPath("/", locale), siteUrl).toString()
+  const latestTopoRock = topoLocation(latestTopo, home.rocks)
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": `${siteUrl}/#website`,
-        url: localizedHomeUrl,
-        name: "Munichclimbs",
-        inLanguage: isEnglish ? "en-US" : "de-DE",
-      },
-      {
-        "@type": "ItemList",
-        name: isEnglish ? "Climbing areas around Munich" : "Klettergebiete um München",
-        itemListElement: onlineAreas.map((area, index) => ({
-          "@type": "ListItem",
-          position: index + 1,
-          name: area.name,
-          url: new URL(`${isEnglish ? "/en" : ""}/${getAreaSlug(area)}`, siteUrl).toString(),
-        })),
-      },
+      { "@type": "WebSite", "@id": `${siteUrl}/#website`, url: siteUrl, name: "Munichclimbs", description: pageDescription, inLanguage: locale === "en" ? "en-US" : "de-DE" },
+      { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "Munichclimbs", url: siteUrl, logo: { "@type": "ImageObject", url: `${siteUrl}/build/images/favicon/android-chrome-512x512.png` } },
+      { "@type": "WebPage", "@id": `${homeUrl}#webpage`, url: homeUrl, name: "Munichclimbs", description: pageDescription, isPartOf: { "@id": `${siteUrl}/#website` }, about: { "@type": "Thing", name: locale === "en" ? "Climbing" : "Klettern" }, inLanguage: locale === "en" ? "en-US" : "de-DE" },
+      { "@type": "ItemList", name: labels.heading, description: pageDescription, numberOfItems: home.areas.length, itemListElement: home.areas.map((area, index) => ({ "@type": "ListItem", position: index + 1, item: { "@type": "SportsActivityLocation", name: area.name, url: new URL(localizedPath(`/${area.slug}`, locale), siteUrl).toString(), ...(area.image ? { image: `${siteUrl}/uploads/areas/${area.image}.webp` } : {}) } })) },
     ],
   }
-
-  return (
-    <section className="home-page flex flex-col gap-6" aria-labelledby="index-page-heading">
-      <script
-        type="application/ld+json"
-        // JSON.stringify is safe here because this is application data, not HTML.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
-      />
-      <div className="mb-3 flex items-center justify-between gap-3 py-3">
-        <h1 id="index-page-heading" className="text-2xl font-medium leading-tight sm:text-3xl">
-          Klettergebiete um München
-        </h1>
-        <AreasMapDialog areas={onlineAreas} rocks={rocks} summaries={areaMapSummaries} rockSummaries={individualRockMapSummaries} />
-      </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
-        <section className="min-w-0 lg:col-span-8" aria-label="Klettergebiete">
-          <div className="flex flex-col gap-4">
-            {areasWithRoutes.length > 0 ? (
-              areasWithRoutes.map(({ area, routes }, index) => (
-                <AreaCard key={area.id} area={area} routes={routes} rockCount={publishedRockCount(area, rocks)} priority={index === 0} />
-              ))
-            ) : (
-              <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                Derzeit sind keine Klettergebiete veröffentlicht.
-              </p>
-            )}
-          </div>
-        </section>
-        <aside className="grid min-w-0 auto-rows-auto grid-cols-1 items-start gap-6 self-start lg:col-span-4" aria-label="Neueste Topos">
-          <BannedRocksCard rocks={bannedRockCardsData} />
-          <LatestTopoCard topo={latestTopo} {...latestTopoLocation} />
-          <LatestRoutesCard routes={latestRouteCardsData} />
-          <SupportProjectCard />
-        </aside>
-      </div>
-    </section>
-  )
+  return <section className="home-page flex flex-col gap-6" aria-labelledby="index-page-heading"><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} /><div className="mb-3 flex items-center justify-between gap-3 py-3"><h1 id="index-page-heading" className="text-2xl font-medium leading-tight sm:text-3xl">{labels.heading}</h1><AreasMapDialog areas={home.areas} rocks={home.rocks} locale={locale} /></div><div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8"><section className="min-w-0 lg:col-span-8" aria-label={labels.areas}><div className="flex flex-col gap-4">{home.areas.length ? home.areas.map((area, index) => <AreaCard key={area.areaId} area={area} locale={locale} priority={index === 0} />) : <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">{labels.noAreas}</p>}</div></section><aside className="grid min-w-0 auto-rows-auto grid-cols-1 items-start gap-6 self-start lg:col-span-4" aria-label={labels.sidebar}><BannedRocksCard rocks={home.bannedRocks} locale={locale} /><LatestTopoCard topo={latestTopo} areaSlug={latestTopoRock?.areaSlug} areaName={latestTopoRock?.areaName} rockSlug={latestTopoRock?.rockSlug} rockName={latestTopoRock?.rockName} locale={locale} /><LatestRoutesCard routes={home.latestRoutes} locale={locale} /><SupportProjectCard locale={locale} /></aside></div></section>
 }

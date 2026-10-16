@@ -5,6 +5,7 @@ import type { ApiReference, PublicComment, PublicPhoto, PublicVideo } from "@/ty
 import type { AreaTopRoutesResponse, RailwayAccess, RailwayAccessResponse } from "@/types/public-derived"
 import type { Rock } from "@/types/rock"
 import type { Route } from "@/types/route"
+import type { HomeData, LatestRoutesPageRoute } from "@/types/home"
 import { getAreaSlug, slugifyAreaName } from "@/lib/slugify"
 
 const API_BASE_URL = process.env.MUNICHCLIMBS_API_URL ?? (
@@ -83,6 +84,28 @@ export async function fetchRocks(): Promise<Rock[]> {
     name: rock.name || String(rock.id),
     url: rock.url || rock.slug ? `/rocks/${rock.slug || rock.id}` : "#",
   }))
+}
+
+/**
+ * Server-owned home-page read model. It uses the same aggregate queries and
+ * cache as Symfony, preserving chart buckets, project counts, and map travel
+ * times without recreating those rules in React.
+ */
+export async function fetchHomeData(): Promise<HomeData> {
+  const response = requireSuccessfulResponse(await fetchApi("/home", ["home"]), "home")
+  const data = await response.json() as Partial<HomeData>
+  if (!Array.isArray(data.areas) || !Array.isArray(data.rocks) || !Array.isArray(data.latestRoutes) || !Array.isArray(data.bannedRocks)) {
+    throw new Error("Invalid public API response format for home")
+  }
+  return data as HomeData
+}
+
+/** The legacy latest-routes page, exposed as an explicit public read model. */
+export async function fetchLatestRoutesPage(): Promise<LatestRoutesPageRoute[]> {
+  const response = requireSuccessfulResponse(await fetchApi("/latest-routes", ["latest-routes"]), "latest routes page")
+  const data = await response.json() as { routes?: LatestRoutesPageRoute[] }
+  if (!Array.isArray(data.routes)) throw new Error("Invalid public API response format for latest routes page")
+  return data.routes
 }
 
 /** API area item with rocks as returned from /api/areas/{id}. */
