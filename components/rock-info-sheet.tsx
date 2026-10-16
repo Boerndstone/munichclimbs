@@ -27,20 +27,21 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button"
 import { RouteGradeHistogram } from "@/components/route-grade-histogram"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import type { RouteSummary } from "@/lib/api"
+import type { RockTranslationLocale, RouteSummary } from "@/lib/api"
 import type { PublicPhoto, PublicVideo } from "@/types/public-content"
+import type { RailwayAccess } from "@/types/public-derived"
 import type { Rock } from "@/types/rock"
 import { galleryImageUrl } from "@/lib/media"
 
 type Props = {
   rock: Rock
-  railwayStation?: unknown
+  railwayAccesses: RailwayAccess[]
   routes: RouteSummary[]
   photos: PublicPhoto[]
   videos: PublicVideo[]
+  contentLocale?: RockTranslationLocale | null
+  translationStatus?: "exact" | "fallback" | "missing"
 }
-
-type RailwayAccess = { stationName: string; minutes: number; mode: "walk" | "bike" }
 
 function textFrom(...values: Array<string | null | undefined>) {
   for (const value of values) {
@@ -62,45 +63,6 @@ function coordinate(value: unknown) {
   return null
 }
 
-function stations(value: unknown): Array<Record<string, unknown>> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return []
-  const record = value as Record<string, unknown>
-  if ("lat" in record || "lng" in record) return [record]
-  if (Array.isArray(record.trainStations)) return record.trainStations.filter((station): station is Record<string, unknown> => Boolean(station) && typeof station === "object" && !Array.isArray(station))
-  return Object.values(record).filter((station): station is Record<string, unknown> => Boolean(station) && typeof station === "object" && !Array.isArray(station))
-}
-
-function railwayAccesses(rock: Rock, railwayStation: unknown): RailwayAccess[] {
-  if (!rock.train && !rock.bike) return []
-  const latitude = coordinate(rock.lat)
-  const longitude = coordinate(rock.lng)
-  if (latitude === null || longitude === null) return []
-
-  let nearest: Record<string, unknown> | null = null
-  let nearestDistance: number | null = null
-  for (const station of stations(railwayStation)) {
-    const stationLat = coordinate(station.lat)
-    const stationLng = coordinate(station.lng)
-    if (stationLat === null || stationLng === null) continue
-    const latDelta = ((latitude - stationLat) * Math.PI) / 180
-    const lngDelta = ((longitude - stationLng) * Math.PI) / 180
-    const a = Math.sin(latDelta / 2) ** 2 + Math.cos((stationLat * Math.PI) / 180) * Math.cos((latitude * Math.PI) / 180) * Math.sin(lngDelta / 2) ** 2
-    const distance = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    if (nearestDistance === null || distance < nearestDistance) {
-      nearest = station
-      nearestDistance = distance
-    }
-  }
-  if (!nearest || nearestDistance === null) return []
-
-  const stationName = typeof nearest.name === "string" && nearest.name.trim() ? nearest.name.trim() : "Bahnhof"
-  const estimate = (speedKmh: number) => Math.max(5, Math.ceil(((nearestDistance * 1.3) / speedKmh) * 60 / 5) * 5)
-  return [
-    ...(rock.train ? [{ stationName, minutes: estimate(4.5), mode: "walk" as const }] : []),
-    ...(rock.bike ? [{ stationName, minutes: estimate(13), mode: "bike" as const }] : []),
-  ]
-}
-
 function SectionTitle({ icon: Icon, children }: { icon: typeof Info; children: React.ReactNode }) {
   return (
     <span className="flex items-center gap-2 text-black">
@@ -115,7 +77,15 @@ function BooleanValue({ value, label }: { value: boolean | null | undefined; lab
   return value ? label : "Nein"
 }
 
-export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: Props) {
+export function RockInfoSheet({
+  rock,
+  railwayAccesses,
+  routes,
+  photos,
+  videos,
+  contentLocale,
+  translationStatus,
+}: Props) {
   const description = textFrom(rock.description, rock.rockDescription)
   const access = textFrom(rock.access, rock.rockAccess)
   const nature = textFrom(rock.nature, rock.rockNature)
@@ -128,7 +98,6 @@ export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: 
     : null
   const mapUrl = hasMap ? `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}` : null
   const googleMapUrl = hasMap ? `https://www.google.com/maps/search/?api=1&query=${latitude}%2C${longitude}` : null
-  const accessEstimates = railwayAccesses(rock, railwayStation)
 
   return (
     <Sheet>
@@ -144,6 +113,17 @@ export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: 
           <SheetTitle className="text-black">{rock.name}</SheetTitle>
           <SheetDescription className="sr-only">Informationen, Anfahrt, Karte, Bilder und Hinweise für den Fels {rock.name}.</SheetDescription>
         </SheetHeader>
+
+        {translationStatus === "fallback" && (
+          <p role="status" className="border-b border-black bg-muted px-3 py-2 text-sm text-muted-foreground">
+            English translation unavailable — showing the German rock information.
+          </p>
+        )}
+        {translationStatus === "missing" && (
+          <p role="status" className="border-b border-black bg-muted px-3 py-2 text-sm text-muted-foreground">
+            English rock information is not available yet.
+          </p>
+        )}
 
         <div className="min-h-0 flex-1">
           <Accordion type="multiple" defaultValue={["general"]}>
@@ -173,21 +153,21 @@ export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: 
 
             {description && <AccordionItem value="description">
               <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={BookText}>Beschreibung</SectionTitle></AccordionTrigger>
-              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p className="whitespace-pre-line leading-relaxed">{description}</p></AccordionContent>
+              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p lang={contentLocale ?? undefined} className="whitespace-pre-line leading-relaxed">{description}</p></AccordionContent>
             </AccordionItem>}
 
-            {(access || accessEstimates.length > 0) && <AccordionItem value="access">
+            {(access || railwayAccesses.length > 0) && <AccordionItem value="access">
               <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Signpost}>Anfahrt &amp; Zustieg</SectionTitle></AccordionTrigger>
               <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black">
-                {accessEstimates.length > 0 && <div className="mb-3 space-y-2">
-                  {accessEstimates.map((estimate) => (
+                {railwayAccesses.length > 0 && <div className="mb-3 space-y-2">
+                  {railwayAccesses.map((estimate) => (
                     <div key={estimate.mode} className="border border-black bg-transparent p-2.5">
                       <div className="font-semibold leading-snug">{estimate.mode === "bike" ? "Mit der Bahn und Fahrrad" : "Vom Bahnhof zu Fuß"}</div>
                       <div className="text-xs leading-snug opacity-80">ca. {estimate.minutes} Min. ab {estimate.stationName}</div>
                     </div>
                   ))}
                 </div>}
-                {access && <p className="whitespace-pre-line leading-relaxed">{access}</p>}
+                {access && <p lang={contentLocale ?? undefined} className="whitespace-pre-line leading-relaxed">{access}</p>}
               </AccordionContent>
             </AccordionItem>}
 
@@ -211,12 +191,12 @@ export function RockInfoSheet({ rock, railwayStation, routes, photos, videos }: 
 
             {nature && <AccordionItem value="nature">
               <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={TriangleAlert}>Kletterregelung &amp; Naturschutz</SectionTitle></AccordionTrigger>
-              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p className="whitespace-pre-line leading-relaxed">{nature}</p></AccordionContent>
+              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p lang={contentLocale ?? undefined} className="whitespace-pre-line leading-relaxed">{nature}</p></AccordionContent>
             </AccordionItem>}
 
             {flowers && <AccordionItem value="flowers">
               <AccordionTrigger className="rounded-none border-0 px-5 py-3 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-bg-lighter)] hover:no-underline **:data-[slot=accordion-trigger-icon]:text-[var(--theme-text)]"><SectionTitle icon={Flower}>Pflanzen</SectionTitle></AccordionTrigger>
-              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p className="whitespace-pre-line leading-relaxed">{flowers}</p></AccordionContent>
+              <AccordionContent className="border-t border-black px-5 pb-3 pt-2 text-black"><p lang={contentLocale ?? undefined} className="whitespace-pre-line leading-relaxed">{flowers}</p></AccordionContent>
             </AccordionItem>}
 
             <AccordionItem value="images">

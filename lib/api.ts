@@ -2,6 +2,7 @@ import "server-only"
 
 import type { Area, AreasResponse } from "@/types/area"
 import type { ApiReference, PublicComment, PublicPhoto, PublicVideo } from "@/types/public-content"
+import type { AreaTopRoutesResponse, RailwayAccess, RailwayAccessResponse } from "@/types/public-derived"
 import type { Rock } from "@/types/rock"
 import type { Route } from "@/types/route"
 import { getAreaSlug, slugifyAreaName } from "@/lib/slugify"
@@ -126,6 +127,22 @@ export interface RockTranslationSummary {
   flowers?: string | null
 }
 
+/** Locales for which the public rock-translation endpoint has a defined policy. */
+export type RockTranslationLocale = "de" | "en"
+
+/**
+ * A localized rock record plus the outcome of the locale selection.
+ *
+ * English is allowed to fall back to the German source record. A missing record
+ * is kept distinct from that fallback so the UI can say that content is not
+ * available instead of pretending it is translated.
+ */
+export interface RockTranslationResult {
+  translation: RockTranslationSummary | null
+  contentLocale: RockTranslationLocale | null
+  status: "exact" | "fallback" | "missing"
+}
+
 interface HydraCollection<T> {
   "hydra:member"?: T[]
   "hydra:view"?: { "hydra:next"?: string }
@@ -166,16 +183,44 @@ export async function fetchToposForRock(rockId: string | number): Promise<TopoSu
   )
 }
 
-/** Returns one rock's localized long-form content from the public API. */
-export async function fetchRockTranslation(
+/** Fetches one locale-specific rock-translation record. */
+async function fetchRockTranslationForLocale(
   rockId: string | number,
-  locale = "de"
+  locale: RockTranslationLocale
 ): Promise<RockTranslationSummary | null> {
   const translations = await fetchHydraCollection<RockTranslationSummary>(
     `/rock_translations?rock.id=${encodeURIComponent(String(rockId))}&locale=${encodeURIComponent(locale)}`,
     ["rock-translations", `rock-${rockId}`]
   )
+
   return translations[0] ?? null
+}
+
+/**
+ * Returns one rock's localized long-form content from the public API.
+ *
+ * German is the source locale. English pages use English when present, then
+ * deliberately show the German record with `status: "fallback"`. No record in
+ * either language returns `status: "missing"`, allowing callers to render an
+ * explicit unavailable state instead of silently substituting content.
+ */
+export async function fetchRockTranslation(
+  rockId: string | number,
+  locale: RockTranslationLocale = "de"
+): Promise<RockTranslationResult> {
+  const requestedTranslation = await fetchRockTranslationForLocale(rockId, locale)
+  if (requestedTranslation) {
+    return { translation: requestedTranslation, contentLocale: locale, status: "exact" }
+  }
+
+  if (locale === "en") {
+    const germanTranslation = await fetchRockTranslationForLocale(rockId, "de")
+    if (germanTranslation) {
+      return { translation: germanTranslation, contentLocale: "de", status: "fallback" }
+    }
+  }
+
+  return { translation: null, contentLocale: null, status: "missing" }
 }
 
 /** Returns every published route comment for one rock in a single API request. */
@@ -267,4 +312,41 @@ export async function fetchRoutesForArea(areaId: string | number): Promise<Route
     `/routes?area.id=${encodeURIComponent(String(areaId))}&itemsPerPage=100`,
     ["routes", `area-${areaId}`]
   )
+}
+
+/**
+ * Returns the legacy area's Top-100 list from its server-owned contract:
+ * published-rock routes with a grade, grade number descending, name ascending,
+ * and at most 100 rows.
+ */
+export async function fetchTopRoutesForArea(areaId: string | number): Promise<AreaTopRoutesResponse> {
+  const response = requireSuccessfulResponse(
+    await fetchApi(`/areas/${encodeURIComponent(String(areaId))}/top-routes`, ["top-routes", `area-${areaId}`]),
+    `top routes for area ${areaId}`
+  )
+  const data = (await response.json()) as AreaTopRoutesResponse
+
+  if (!Array.isArray(data.routes) || data.limit !== 100 || data.order?.gradeNo !== "DESC" || data.order?.name !== "ASC") {
+    throw new Error(`Invalid public API response format for top routes in area ${areaId}`)
+  }
+
+  return data
+}
+
+/**
+ * Returns the server-calculated final-leg rail estimates for a published rock.
+ * The calculation remains shared with the legacy Symfony frontend.
+ */
+export async function fetchRailwayAccessesForRock(rockId: string | number): Promise<RailwayAccess[]> {
+  const response = requireSuccessfulResponse(
+    await fetchApi(`/rocks/${encodeURIComponent(String(rockId))}/railway-access`, ["railway-access", `rock-${rockId}`]),
+    `railway access for rock ${rockId}`
+  )
+  const data = (await response.json()) as RailwayAccessResponse
+
+  if (!Array.isArray(data.accesses)) {
+    throw new Error(`Invalid public API response format for railway access of rock ${rockId}`)
+  }
+
+  return data.accesses
 }

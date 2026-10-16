@@ -7,6 +7,7 @@ import {
   fetchAreaBySlug,
   fetchCommentsForRock,
   fetchPhotosForRock,
+  fetchRailwayAccessesForRock,
   fetchRocksForArea,
   fetchRockTranslation,
   fetchRoutesForArea,
@@ -95,14 +96,42 @@ export async function RockPageContent({ params, locale = "de" }: Props & { local
 
       return (left.name ?? "").localeCompare(right.name ?? "", locale)
     })
-  const [topos, translation, comments, photos, videos] = await Promise.all([
+  const [topos, translationResult, comments, photos, videos, railwayAccesses] = await Promise.all([
     fetchToposForRock(rock.id),
     fetchRockTranslation(rock.id, locale),
     fetchCommentsForRock(rock.id),
     fetchPhotosForRock(rock.id),
     fetchVideosForRock(rock.id),
+    fetchRailwayAccessesForRock(rock.id),
   ])
-  const rockWithTranslation = { ...rock, ...translation }
+  // Translation fields must be all-or-nothing at the locale boundary. In
+  // particular, do not let a missing English field inherit a legacy German
+  // field from the base rock response and appear translated.
+  const rockWithTranslation = translationResult.translation
+    ? {
+        ...rock,
+        description: translationResult.translation.description ?? null,
+        access: translationResult.translation.access ?? null,
+        nature: translationResult.translation.nature ?? null,
+        flowers: translationResult.translation.flowers ?? null,
+        rockDescription: null,
+        rockAccess: null,
+        rockNature: null,
+        rockFlowers: null,
+      }
+    : locale === "en"
+      ? {
+          ...rock,
+          description: null,
+          access: null,
+          nature: null,
+          flowers: null,
+          rockDescription: null,
+          rockAccess: null,
+          rockNature: null,
+          rockFlowers: null,
+        }
+      : rock
   const heroImage = rockHeroImage(rock.image)
 
   return (
@@ -142,7 +171,15 @@ export async function RockPageContent({ params, locale = "de" }: Props & { local
                 </nav>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <RockInfoSheet rock={rockWithTranslation} railwayStation={area.railwayStation} routes={routes} photos={photos} videos={videos} />
+                <RockInfoSheet
+                  rock={rockWithTranslation}
+                  railwayAccesses={railwayAccesses}
+                  routes={routes}
+                  photos={photos}
+                  videos={videos}
+                  contentLocale={translationResult.contentLocale}
+                  translationStatus={locale === "en" ? translationResult.status : undefined}
+                />
               </div>
             </div>
           </div>

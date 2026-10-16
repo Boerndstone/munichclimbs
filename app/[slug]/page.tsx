@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { fetchAreaBySlug, fetchRocksForArea, fetchRoutesForArea } from "@/lib/api"
+import { fetchAreaBySlug, fetchRocksForArea, fetchRoutesForArea, fetchTopRoutesForArea } from "@/lib/api"
 import { AreaRockList } from "@/components/area-rock-list"
 import { AreaHero } from "@/components/area-hero"
 import type { Metadata } from "next"
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function AreaPage({ params }: Props) {
+export async function AreaPageContent({ params, locale = "de" }: Props & { locale?: "de" | "en" }) {
   const { slug } = await params
   const area = await fetchAreaBySlug(slug)
 
@@ -43,9 +43,10 @@ export default async function AreaPage({ params }: Props) {
   const areaId = typeof area.id === "number" || typeof area.id === "string"
     ? area.id
     : extractRockId(String(area["@id"] ?? ""))
-  const [rocks, routes] = await Promise.all([
+  const [rocks, routes, topRoutes] = await Promise.all([
     fetchRocksForArea(areaId),
     fetchRoutesForArea(areaId),
+    fetchTopRoutesForArea(areaId),
   ])
   const routesByRock = new Map<string, typeof routes>()
   for (const route of routes) {
@@ -60,7 +61,7 @@ export default async function AreaPage({ params }: Props) {
 
   return (
     <div className="area-page">
-      <AreaHero name={area.name} headerImage={area.headerImage} />
+      <AreaHero name={area.name} headerImage={area.headerImage} locale={locale} topRoutes={topRoutes.routes} />
 
       <section className="mx-auto my-4 w-full max-w-[1024px] px-2 sm:px-4">
           <AreaRockList
@@ -75,3 +76,5 @@ export default async function AreaPage({ params }: Props) {
     </div>
   )
 }
+
+export default AreaPageContent

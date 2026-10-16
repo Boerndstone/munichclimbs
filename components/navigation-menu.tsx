@@ -15,10 +15,20 @@ function isOnline(area: Area) {
   return Number(area.online) === 1
 }
 
+function isEnglishPath(pathname: string) {
+  return pathname === "/en" || pathname.startsWith("/en/")
+}
+
+function localizedPath(pathname: string, locale: "de" | "en") {
+  const germanPath = pathname === "/en" ? "/" : pathname.replace(/^\/en(?=\/)/, "")
+
+  return locale === "de" ? germanPath : germanPath === "/" ? "/en" : `/en${germanPath}`
+}
+
 function NavigationArea({ area }: { area: Area }) {
   const pathname = usePathname()
   const areaSlug = getAreaSlug(area)
-  const areaPath = `/${areaSlug}`
+  const areaPath = `${isEnglishPath(pathname) ? "/en" : ""}/${areaSlug}`
   const rocks = area.rocks ?? []
   const isCurrentArea = pathname === areaPath || pathname.startsWith(`${areaPath}/`)
   const [isOpen, setIsOpen] = useState(isCurrentArea)
@@ -73,6 +83,10 @@ function NavigationArea({ area }: { area: Area }) {
 export function NavigationMenu({ areas }: { areas: Area[] }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const settingsTriggerRef = useRef<HTMLButtonElement>(null)
+  const pathname = usePathname()
+  const english = isEnglishPath(pathname)
+  const germanPath = localizedPath(pathname, "de")
+  const englishPath = localizedPath(pathname, "en")
   const [dark, setDark] = useState(() => {
     if (typeof window === "undefined") return false
 
@@ -113,7 +127,7 @@ export function NavigationMenu({ areas }: { areas: Area[] }) {
               <SheetDescription className="sr-only">Liste der Klettergebiete und Felsen.</SheetDescription>
               <div className="flex h-full min-h-0 flex-col bg-background">
                 <div className="flex shrink-0 items-center border-b border-border px-3 py-2">
-                  <Link href="/" className="chelsea-market-regular text-lg no-underline">
+                  <Link href={english ? "/en" : "/"} className="chelsea-market-regular text-lg no-underline">
                     munichclimbs
                   </Link>
                 </div>
@@ -131,7 +145,7 @@ export function NavigationMenu({ areas }: { areas: Area[] }) {
               </div>
             </SheetContent>
           </Sheet>
-          <Link href="/" className="chelsea-market-regular hidden text-xl leading-tight no-underline md:inline">munichclimbs</Link>
+          <Link href={english ? "/en" : "/"} className="chelsea-market-regular hidden text-xl leading-tight no-underline md:inline">munichclimbs</Link>
         </div>
 
         <SearchModal areas={visibleAreas} />
@@ -143,6 +157,15 @@ export function NavigationMenu({ areas }: { areas: Area[] }) {
           {settingsOpen && (
             <div id="navigation-settings" role="menu" aria-label="Einstellungen" onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); closeSettings() } }} className="absolute end-0 top-[calc(100%+6px)] z-[1070] w-max min-w-0 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg)] py-1 text-[var(--theme-text)] shadow-lg ring-1 ring-black/5 dark:ring-white/10">
               <div className="flex flex-wrap items-center gap-3 px-2 py-2">
+                <div className="flex items-center rounded-md border border-border p-0.5" role="group" aria-label="Sprache">
+                  <Button asChild variant={english ? "ghost" : "secondary"} size="sm" className="h-7 px-2 text-xs" aria-current={english ? undefined : "page"}>
+                    <Link href={germanPath}>DE</Link>
+                  </Button>
+                  <Button asChild variant={english ? "secondary" : "ghost"} size="sm" className="h-7 px-2 text-xs" aria-current={english ? "page" : undefined}>
+                    <Link href={englishPath}>EN</Link>
+                  </Button>
+                </div>
+                <span className="h-5 w-px bg-border" aria-hidden="true" />
                 <div className="px-1">
                   <button onClick={toggleTheme} role="menuitem" aria-label={dark ? "Helles Farbschema aktivieren" : "Dunkles Farbschema aktivieren"} className="focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg text-[var(--theme-text)] hover:cursor-pointer">
                     {dark ? <Moon className="size-4" /> : <Sun className="size-4" />}

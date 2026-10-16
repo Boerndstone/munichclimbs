@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 
-import GermanAreaPage from "@/app/[slug]/page"
+import { AreaPageContent } from "@/app/[slug]/page"
 import { fetchAreaBySlug } from "@/lib/api"
 import { englishCanonicalPath, localizedAlternates } from "@/lib/seo"
 
@@ -29,4 +29,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default GermanAreaPage
+export default function EnglishAreaPage({ params }: Props) {
+  return <AreaPageContent params={params} locale="en" />
+}
