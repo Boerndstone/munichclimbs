@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import type { ReactNode } from "react"
 import { Database, HardHat, Skull, Star, Trash2, TriangleAlert } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,9 @@ type Props = {
   areaName: string
   locale: "de" | "en"
   routes: AreaTopRoute[]
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  trigger?: ReactNode
 }
 
 function routePath(route: AreaTopRoute, locale: "de" | "en") {
@@ -35,17 +39,18 @@ function RouteIndicators({ route }: { route: AreaTopRoute }) {
   )
 }
 
-export function AreaTopRoutesDialog({ areaName, locale, routes }: Props) {
+export function AreaTopRoutesDialog({ areaName, locale, routes, open, onOpenChange, trigger }: Props) {
   if (routes.length === 0) return null
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <Dialog {...(open === undefined ? {} : { open, onOpenChange })}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {!trigger && open === undefined && <DialogTrigger asChild>
         <Button type="button" variant="secondary" size="sm" className="bg-white/90 text-black hover:bg-white">
           <Database className="size-4" aria-hidden="true" />
           Top 100
         </Button>
-      </DialogTrigger>
+      </DialogTrigger>}
       <DialogContent aria-describedby="area-top-routes-description" className="max-w-5xl p-0">
         <header className="flex shrink-0 items-center gap-3 border-b px-4 py-3 pr-12">
           <DialogTitle className="min-w-0 flex-1 text-base font-semibold leading-tight sm:text-lg">

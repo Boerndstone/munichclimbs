@@ -61,7 +61,7 @@ export async function AreaPageContent({ params, locale = "de" }: Props & { local
 
   return (
     <div className="area-page">
-      <AreaHero name={area.name} headerImage={area.headerImage} locale={locale} topRoutes={topRoutes.routes} />
+      <AreaHero name={area.name} headerImage={area.headerImage} locale={locale} topRoutes={topRoutes.routes} areaSlug={slug} kletterkonzeption={area.kletterkonzeption} lat={area.lat} lng={area.lng} rocks={rocks} />
 
       <section className="mx-auto my-4 w-full max-w-[1024px] px-2 sm:px-4">
           <AreaRockList

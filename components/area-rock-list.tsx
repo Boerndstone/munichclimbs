@@ -81,7 +81,7 @@ export function AreaRockList({
 
   return (
     <div className="min-w-0">
-      <Card className="mb-2 gap-0 py-0 lg:sticky lg:top-[55px] lg:z-[1000]">
+      <Card className="mb-2 gap-0 py-0 lg:sticky lg:top-[55px] lg:z-[50]">
         <CardHeader className="px-3 pb-2 pt-3">
           <CardTitle className="text-base font-medium">
             {visibleRows.length} {visibleRows.length === 1 ? "Fels" : "Felsen"}

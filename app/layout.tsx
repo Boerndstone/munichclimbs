@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { SiteNavigation } from "@/components/site-navigation"
 import { SiteFooter } from "@/components/site-footer"
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = localFont({
   variable: "--font-ui",
@@ -77,6 +78,7 @@ export default function RootLayout({
         </main>
         <SiteFooter />
       </body>
+      <Analytics />
     </html>
   );
 }
