@@ -343,10 +343,21 @@ export async function fetchRoutesForArea(areaId: string | number): Promise<Route
  * and at most 100 rows.
  */
 export async function fetchTopRoutesForArea(areaId: string | number): Promise<AreaTopRoutesResponse> {
-  const response = requireSuccessfulResponse(
-    await fetchApi(`/areas/${encodeURIComponent(String(areaId))}/top-routes`, ["top-routes", `area-${areaId}`]),
-    `top routes for area ${areaId}`
+  const response = await fetchApi(
+    `/areas/${encodeURIComponent(String(areaId))}/top-routes`,
+    ["top-routes", `area-${areaId}`]
   )
+
+  // The dedicated endpoint is part of the migration contract, but some
+  // production Symfony deployments can temporarily predate it. Top-100 is an
+  // enhancement of the area page, so a missing endpoint must not make the
+  // entire area unavailable. Other failures remain visible to the route error
+  // boundary instead of being mistaken for an intentionally empty result.
+  if (response.status === 404) {
+    return { routes: [], total: 0, order: { gradeNo: "DESC", name: "ASC" }, limit: 100 }
+  }
+
+  requireSuccessfulResponse(response, `top routes for area ${areaId}`)
   const data = (await response.json()) as AreaTopRoutesResponse
 
   if (!Array.isArray(data.routes) || data.limit !== 100 || data.order?.gradeNo !== "DESC" || data.order?.name !== "ASC") {
@@ -361,10 +372,17 @@ export async function fetchTopRoutesForArea(areaId: string | number): Promise<Ar
  * The calculation remains shared with the legacy Symfony frontend.
  */
 export async function fetchRailwayAccessesForRock(rockId: string | number): Promise<RailwayAccess[]> {
-  const response = requireSuccessfulResponse(
-    await fetchApi(`/rocks/${encodeURIComponent(String(rockId))}/railway-access`, ["railway-access", `rock-${rockId}`]),
-    `railway access for rock ${rockId}`
+  const response = await fetchApi(
+    `/rocks/${encodeURIComponent(String(rockId))}/railway-access`,
+    ["railway-access", `rock-${rockId}`]
   )
+
+  // Railway estimates are supplementary data. Until the corresponding
+  // Symfony endpoint is deployed, retain the core rock page and omit only
+  // this optional section. Do not suppress real upstream failures.
+  if (response.status === 404) return []
+
+  requireSuccessfulResponse(response, `railway access for rock ${rockId}`)
   const data = (await response.json()) as RailwayAccessResponse
 
   if (!Array.isArray(data.accesses)) {
