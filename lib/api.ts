@@ -92,7 +92,48 @@ export async function fetchRocks(): Promise<Rock[]> {
  * times without recreating those rules in React.
  */
 export async function fetchHomeData(): Promise<HomeData> {
-  const response = requireSuccessfulResponse(await fetchApi("/home", ["home"]), "home")
+  const response = await fetchApi("/home", ["home"])
+
+  // Older production Symfony deployments expose the individual public
+  // resources but not the migration's aggregate home read model yet. Keep the
+  // homepage useful in that transition by rendering the published area cards
+  // from the stable /areas endpoint. The richer aggregate is used immediately
+  // once /home is available again.
+  if (response.status === 404) {
+    const areas = await fetchAreas()
+
+    return {
+      areas: areas
+        .filter((area) => area.online !== false && area.online !== 0)
+        .map((area) => ({
+          areaId: Number(area.id),
+          name: area.name,
+          slug: getAreaSlug(area),
+          image: area.image ?? null,
+          lat: area.lat,
+          lng: area.lng,
+          travelTimeMinutes: area.travelTimeMinutes ?? null,
+          routes: area.routes?.length ?? 0,
+          rocks: area.rocks?.length ?? 0,
+          rocksWithCoordinates: 0,
+          amountProjects: 0,
+          grade_chart_3: 0,
+          grade_chart_4: 0,
+          grade_chart_5: 0,
+          grade_chart_6: 0,
+          grade_chart_7: 0,
+          grade_chart_8: 0,
+          grade_chart_9: 0,
+          grade_chart_10: 0,
+          grade_chart_11: 0,
+        })),
+      rocks: [],
+      latestRoutes: [],
+      bannedRocks: [],
+    }
+  }
+
+  requireSuccessfulResponse(response, "home")
   const data = await response.json() as Partial<HomeData>
   if (!Array.isArray(data.areas) || !Array.isArray(data.rocks) || !Array.isArray(data.latestRoutes) || !Array.isArray(data.bannedRocks)) {
     throw new Error("Invalid public API response format for home")
