@@ -11,7 +11,7 @@ import { getAreaSlug, slugifyAreaName } from "@/lib/slugify"
 const API_BASE_URL = process.env.MUNICHCLIMBS_API_URL ?? (
   process.env.NODE_ENV === "development"
     ? "http://127.0.0.1:8083/api/v1"
-    : "https://www.munichclimbs.de/api/v1"
+    : "https://www.munichclimbs.com/api/v1"
 )
 
 /** Public climbing data changes infrequently; stale data is served while Next refreshes it. */
