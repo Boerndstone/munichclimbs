@@ -1,4 +1,3 @@
-import Image from "next/image"
 import Link from "next/link"
 import { Home } from "lucide-react"
 import { notFound } from "next/navigation"
@@ -19,8 +18,8 @@ import { RockTopoSections } from "@/components/rock-topo-sections"
 import type { Rock } from "@/types/rock"
 import type { ApiReference } from "@/types/public-content"
 import type { Metadata } from "next"
-import { headerImageUrl } from "@/lib/media"
 import { localizedAlternates } from "@/lib/seo"
+import { localizedPath } from "@/lib/home-copy"
 
 type Props = { params: Promise<{ slug: string; rockSlug: string }> }
 
@@ -41,11 +40,6 @@ function rockMatchesSlug(rock: Rock, rockSlug: string) {
 function routeRockId(route: { rock?: ApiReference | string | null }) {
   if (typeof route.rock === "string") return extractId(route.rock)
   return route.rock?.id?.toString() ?? extractId(route.rock?.["@id"] ?? "")
-}
-
-function rockHeroImage(image: unknown) {
-  if (typeof image !== "string" || image.length === 0) return null
-  return headerImageUrl(image)
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -132,61 +126,48 @@ export async function RockPageContent({ params, locale = "de" }: Props & { local
           rockFlowers: null,
         }
       : rock
-  const heroImage = rockHeroImage(rock.image)
-
   return (
     <div className="rock-page">
-      <section className="relative w-full">
-        <div className="h-[220px] overflow-hidden bg-muted sm:h-[300px]">
-          {heroImage ? (
-            <Image
-              src={heroImage}
-              alt={`Kletterfels ${rock.name} im Klettergebiet ${area.name}`}
-              width={1600}
-              height={500}
-              priority
-              sizes="100vw"
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-br from-slate-600 via-slate-500 to-slate-300" />
-          )}
-        </div>
-
-        <div className="absolute inset-x-0 top-0 mx-auto mt-3 w-full max-w-[1024px] px-2 sm:px-4">
-          <div className="rounded-md bg-white/70 p-3 shadow-md ring-1 ring-black/5 backdrop-blur-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h1 className="truncate text-xl font-medium text-black sm:text-2xl">{rock.name}</h1>
-                <nav aria-label="Breadcrumb" className="mt-1 flex items-center gap-1.5 text-sm text-black/80">
-                  <Link href="/" aria-label="Startseite" className="hover:text-black">
-                    <Home className="size-4" />
+      <section className="mx-auto w-full max-w-[1024px] p-2 text-[var(--theme-text)] sm:p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex w-full flex-col">
+            <div className="flex items-center justify-between gap-2">
+              <h1 className="m-0 min-w-0 truncate text-xl font-medium text-[var(--theme-text)] md:text-2xl">
+                {rock.name}
+              </h1>
+              <RockInfoSheet
+                rock={rockWithTranslation}
+                railwayAccesses={railwayAccesses}
+                routes={routes}
+                photos={photos}
+                videos={videos}
+                contentLocale={translationResult.contentLocale}
+                translationStatus={locale === "en" ? translationResult.status : undefined}
+              />
+            </div>
+            <nav aria-label="Breadcrumb" className="mt-1 text-[var(--theme-text)]">
+              <ol className="m-0 flex list-none flex-wrap items-center gap-x-2 gap-y-1 p-0 text-xs font-normal">
+                <li>
+                  <Link href={localizedPath("/", locale)} className="inline-flex shrink-0 items-center transition-colors hover:underline">
+                    <Home className="size-4" aria-hidden="true" />
+                    <span className="sr-only">Startseite</span>
                   </Link>
-                  <span aria-hidden="true">/</span>
-                  <Link href={`/${slug}`} className="truncate hover:text-black hover:underline">
+                </li>
+                <li role="presentation" aria-hidden="true" className="text-gray-600">/</li>
+                <li>
+                  <Link href={localizedPath(`/${slug}`, locale)} className="transition-colors hover:underline">
                     {area.name}
                   </Link>
-                  <span aria-hidden="true">/</span>
-                  <span className="truncate text-black">{rock.name}</span>
-                </nav>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <RockInfoSheet
-                  rock={rockWithTranslation}
-                  railwayAccesses={railwayAccesses}
-                  routes={routes}
-                  photos={photos}
-                  videos={videos}
-                  contentLocale={translationResult.contentLocale}
-                  translationStatus={locale === "en" ? translationResult.status : undefined}
-                />
-              </div>
-            </div>
+                </li>
+                <li role="presentation" aria-hidden="true" className="text-gray-600">/</li>
+                <li aria-current="page" className="min-w-0 truncate">{rock.name}</li>
+              </ol>
+            </nav>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto w-full max-w-[1024px] px-2 py-4 sm:px-4">
+      <div className="mx-auto w-full max-w-[1024px] px-2 pb-4 sm:px-4">
         <div className="min-w-0 md:w-3/4">
           <RockTopoSections topos={topos} routes={routes} comments={comments} />
         </div>

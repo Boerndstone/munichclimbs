@@ -102,10 +102,9 @@ export function RockInfoSheet({
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="secondary" size="sm" className="shrink-0 bg-white/90 text-black hover:bg-white">
+        <Button variant="outline" size="sm" className="shrink-0">
           <Info className="size-4" aria-hidden="true" />
-          <span className="hidden sm:inline">Fels</span>
-          <span className="sr-only sm:hidden">Fels-Infos öffnen</span>
+          <span className="sr-only">Fels-Informationen anzeigen</span>
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-full gap-0 overflow-y-auto border-l border-black bg-white p-0 text-black sm:max-w-[24rem]">
