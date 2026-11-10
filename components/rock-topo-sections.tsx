@@ -3,7 +3,7 @@ import { Info } from "lucide-react"
 
 import type { RouteSummary, TopoSummary } from "@/lib/api"
 import type { PublicComment } from "@/types/public-content"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { topoImageUrl } from "@/lib/media"
+import { TopoTabs } from "@/components/topo-tabs"
 
 function routeId(comment: PublicComment): number | undefined {
   return typeof comment.route?.id === "number" ? comment.route.id : undefined
@@ -121,16 +122,12 @@ function RouteTable({ routes, comments }: { routes: RouteSummary[]; comments: Pu
                   <td className="w-11 px-2 py-1 align-middle lg:w-12">
                     {routeComments.length > 0 && (
                       <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-sm"
-                            className="rounded-full"
-                            aria-label={`Kommentare zu ${route.name} öffnen`}
-                          >
-                            <Info className="size-4" aria-hidden="true" />
-                          </Button>
+                        <DialogTrigger
+                          type="button"
+                          className={buttonVariants({ variant: "ghost", size: "icon-sm", className: "rounded-full" })}
+                          aria-label={`Kommentare zu ${route.name} öffnen`}
+                        >
+                          <Info className="size-4" aria-hidden="true" />
                         </DialogTrigger>
                         <DialogContent className="max-h-[calc(100dvh-2rem)] max-w-lg">
                           <header className="flex shrink-0 items-start justify-between gap-3 border-b px-4 py-3 pr-12 text-left">
@@ -191,18 +188,12 @@ export function RockTopoSections({ topos, routes, comments }: { topos: TopoSumma
   return (
     <section className="min-w-0" aria-label="Routen nach Topo">
       {orderedTopos.length > 0 && (
-        <nav className="sticky top-[50px] z-20 mb-3 -ml-2 w-screen overflow-x-auto border-b bg-background sm:-ml-4 md:ml-[calc((1024px-100vw)/2-1rem)]" aria-label="Topo-Navigation">
-          <div className="mx-auto flex w-full max-w-[1024px] gap-1">
-            {orderedTopos.map((topo) => (
-              <a key={topo.id} href={`#topo-${topo.id}`} className="shrink-0 border-b-2 border-transparent px-3 py-2 text-sm hover:border-foreground hover:text-foreground">
-                {topo.name}
-              </a>
-            ))}
-            {otherRoutes.length > 0 && (
-              <a href="#weitere-routen" className="shrink-0 border-b-2 border-transparent px-3 py-2 text-sm hover:border-foreground hover:text-foreground">Weitere Routen</a>
-            )}
-          </div>
-        </nav>
+        <TopoTabs
+          items={[
+            ...orderedTopos.map((topo) => ({ id: `topo-${topo.id}`, label: topo.name })),
+            ...(otherRoutes.length > 0 ? [{ id: "weitere-routen", label: "Weitere Routen" }] : []),
+          ]}
+        />
       )}
 
       {orderedTopos.map((topo) => {
